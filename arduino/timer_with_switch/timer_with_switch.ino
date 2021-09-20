@@ -12,6 +12,12 @@ const int CTRL_2_PIN = 9;
 
 void set_freq(long f) {
   OCR1A = F_CPU / PRESCALE / 2 / f - 1;
+
+  // if current count is greater than compare, we won't hit until
+  // rollover... so reset
+  if (TCNT1 >= OCR1A) {
+    TCNT1 = 0;
+  }
 }
 
 void setup() {
@@ -33,8 +39,8 @@ void setup() {
   set_freq(100000);
 }
 
-const long f_a   =  95000;
-const long f_b   = 105000;
+const long f_a   = 195000;
+const long f_b   = 205000;
 
 void loop() {
 //  for (int i = 1; i < 20; i *= 2) {
