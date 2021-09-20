@@ -9,10 +9,12 @@ const int LED_PIN = 13;
 
 #define PRESCALE 1
 
+#define OCR_REG OCR1B
+
 #define PRINT_REG(reg) (Serial.print(#reg ": "), Serial.println(reg, BIN))
 
 void set_freq(long f) {
-  OCR1A = F_CPU / PRESCALE / 2 / f - 1;
+  OCR_REG = F_CPU / PRESCALE / 2 / f - 1;
 }
 
 void setup() {  
@@ -21,21 +23,24 @@ void setup() {
   
   DDRB |= (1 << DDB1);
 
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  digitalWrite(9, LOW);
+
   TCCR1A = 0;
   TCCR1B = 0;
 
-  // Toggle OC1A (pin 9) on timer compare
-  TCCR1A |= (1 << COM1A0);
+  // Toggle OC1B (pin 10) on timer compare
+  TCCR1A |= (1 << COM1B0);
   // CTC with no prescale
   TCCR1B |= (1 << WGM12) | (1 << CS10);
   // Set compare register - toggle at freq
 //  OCR1A = F_CPU / PRESCALE / 2 / FREQ_HZ - 1;
 
-
   PRINT_REG(TCCR1A);
   PRINT_REG(TCCR1B);
-  PRINT_REG(OCR1A);
-  Serial.print(OCR1A);
+  PRINT_REG(OCR_REG);
+  Serial.print(OCR_REG);
 }
 
 
