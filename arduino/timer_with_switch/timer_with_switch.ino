@@ -33,12 +33,19 @@ void setup() {
   set_freq(100000);
 }
 
-const long f_a =  75000;
-const long f_b   = 125000;
+const long f_a   =  95000;
+const long f_b   = 105000;
 
 void loop() {
-  set_freq(f_a);
-  delay(1000);
-  set_freq(f_b);
-  delay(1000);
+//  for (int i = 1; i < 20; i *= 2) {
+//    set_freq(f_a);
+//    delay(i);
+//    set_freq(f_b);
+//    delay(i);
+//  }
+
+    set_freq(f_a);
+    delay(1);
+    set_freq(f_b);
+    delay(1);
 }
