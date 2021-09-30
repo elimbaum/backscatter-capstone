@@ -1,4 +1,4 @@
-/* Toggle the RF switch a fixed frequency.
+/* Send a message by modulating a signal.
  *  
  */
 
@@ -36,6 +36,8 @@ const long REQ_DEV_FREQ    =   5000;
 long count_a, count_b;
 
 char serial_buffer[256];
+
+const char * MESSAGE = "HELLO!";
 
 void setup() {
   // put your setup code here, to run once:
@@ -97,6 +99,11 @@ void setup() {
     Serial.println(" Hz");
   }
 
+  sprintf(serial_buffer, "Sending message %s (len %d)",
+            MESSAGE,
+            strlen(MESSAGE));
+  Serial.println(serial_buffer);
+
   count_a = high_count;
   count_b = low_count;
 }
@@ -104,11 +111,11 @@ void setup() {
 // how long each FSK period is
 const int KEY_TIME_US = 250;
 
-// a is the high count, so the lower frequency.
-// -> a = 0
-//    b = 1
+// a is the higher frequency, b the lower.
+// -> a = 1
+//    b = 0
 
-// 01
+// 10
 inline void send_zero() {
   set_count(count_a);
   delayMicroseconds(KEY_TIME_US);
@@ -116,7 +123,7 @@ inline void send_zero() {
   delayMicroseconds(KEY_TIME_US);
 }
 
-// 10
+// 01
 inline void send_one() {
   set_count(count_b);
   delayMicroseconds(KEY_TIME_US);
@@ -124,13 +131,52 @@ inline void send_one() {
   delayMicroseconds(KEY_TIME_US);
 }
 
+// preamble: 111101 or 010101011001
+inline void send_preamble() {
+  send_one();
+  send_one();
+  send_one();
+  send_one();
+  send_zero();
+  send_one();
+}
+
+inline void send_bit(char b) {
+  if (b) {
+    send_one();
+  } else {
+    send_zero();
+  }
+}
+
+inline void send_byte(char b) {
+  send_bit(b & (1 << 7));
+  send_bit(b & (1 << 6));
+  send_bit(b & (1 << 5));
+  send_bit(b & (1 << 4));
+  send_bit(b & (1 << 3));
+  send_bit(b & (1 << 2));
+  send_bit(b & (1 << 1));
+  send_bit(b & (1 << 0));
+}
+
+inline void send_length() {
+  int msg_len = strlen(MESSAGE);
+  // GNURadio wants it twice
+  send_byte((msg_len >> 8) & 0xFF);
+  send_byte(msg_len & 0xFF);
+  send_byte((msg_len >> 8) & 0xFF);
+  send_byte(msg_len & 0xFF);
+}
+
 void loop() {
-  send_one();   // 10
-  send_zero();  // 01
-  send_one();   // 10
-  send_one();   // 10
-  send_zero();  // 01
-  send_zero();  // 01
-  send_zero();  // 01
-  send_one();   // 10
+  send_preamble();
+
+  send_length();
+
+  // loop through each byte...
+  for (const char * c = MESSAGE; *c; c++) {
+    // send each bit of each byte
+    send_byte(*c);
+  }
 }

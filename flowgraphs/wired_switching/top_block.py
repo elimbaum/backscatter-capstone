@@ -78,17 +78,21 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.symbol_rate = symbol_rate = 4e3
+        self.filter_samp_rate = filter_samp_rate = 25e3
+        self.sps = sps = int(filter_samp_rate/symbol_rate)
         self.signal_freq_khz = signal_freq_khz = 100
         self.scatter_freq_khz = scatter_freq_khz = 200.125
-        self.fsk_deviation_hz = fsk_deviation_hz = 5e3
+        self.fsk_deviation_hz = fsk_deviation_hz = 5.003e3
         self.tx_samp_rate = tx_samp_rate = 1e6
         self.tx_gain = tx_gain = 0
         self.signal_freq = signal_freq = signal_freq_khz * 1e3
         self.scatter_center_freq = scatter_center_freq = scatter_freq_khz * 1e3
         self.samp_rate = samp_rate = 1e6
-        self.rx_gain = rx_gain = 20
+        self.rx_gain = rx_gain = 35
+        self.rrc_taps = rrc_taps = firdes.root_raised_cosine(1.0, filter_samp_rate,symbol_rate, 0.35, 11*sps)
+        self.nfilts = nfilts = 32
         self.fsk_width_hz = fsk_width_hz = fsk_deviation_hz / 5
-        self.filter_samp_rate = filter_samp_rate = 50e3
         self.center_freq = center_freq = 915e6
 
         ##################################################
@@ -101,7 +105,7 @@ class top_block(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._rx_gain_range = Range(0, 70, 1, 20, 200)
+        self._rx_gain_range = Range(0, 70, 1, 35, 200)
         self._rx_gain_win = RangeWidget(self._rx_gain_range, self.set_rx_gain, 'RX gain (dB)', "counter_slider", float)
         self.top_grid_layout.addWidget(self._rx_gain_win, 2, 2, 1, 1)
         for r in range(2, 3):
@@ -200,54 +204,11 @@ class top_block(gr.top_block, Qt.QWidget):
         self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 10)
 
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
-        self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
-            128, #size
-            filter_samp_rate, #samp_rate
-            "", #name
-            2 #number of inputs
-        )
-        self.qtgui_time_sink_x_1.set_update_time(0.10)
-        self.qtgui_time_sink_x_1.set_y_axis(-2, 2)
-
-        self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_AUTO, qtgui.TRIG_SLOPE_POS, 0.0, 0, 1, "")
-        self.qtgui_time_sink_x_1.enable_autoscale(False)
-        self.qtgui_time_sink_x_1.enable_grid(False)
-        self.qtgui_time_sink_x_1.enable_axis_labels(True)
-        self.qtgui_time_sink_x_1.enable_control_panel(True)
-        self.qtgui_time_sink_x_1.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(2):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_1.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_1.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_1.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_1.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_1.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_1.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.pyqwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_1_win)
+        self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win, 4, 3, 2, 2)
+        for r in range(4, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(3, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.qtgui_freq_sink_x_1 = qtgui.freq_sink_c(
             1024, #size
             firdes.WIN_BLACKMAN_hARRIS, #wintype
@@ -287,8 +248,8 @@ class top_block(gr.top_block, Qt.QWidget):
             self.qtgui_freq_sink_x_1.set_line_alpha(i, alphas[i])
 
         self._qtgui_freq_sink_x_1_win = sip.wrapinstance(self.qtgui_freq_sink_x_1.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_1_win, 3, 1, 2, 2)
-        for r in range(3, 5):
+        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_1_win, 4, 1, 2, 2)
+        for r in range(4, 6):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 3):
             self.top_grid_layout.setColumnStretch(c, 1)
@@ -301,12 +262,14 @@ class top_block(gr.top_block, Qt.QWidget):
                 fsk_width_hz,
                 firdes.WIN_HAMMING,
                 6.76))
+        self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(sps, 6.28/100, rrc_taps, nfilts, 16, 1.5, 1)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
-        self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/Users/ebaum/Documents/capstone/repo/flowgraphs/wired_switching/bitstream_wired_message.txt', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_copy_0 = blocks.copy(gr.sizeof_gr_complex*1)
         self.blocks_copy_0.set_enabled(True)
-        self.blocks_add_const_vxx_0 = blocks.add_const_ff(-0.5)
+        self.blocks_add_const_vxx_0 = blocks.add_const_bb(ord('0'))
         self.analog_sig_source_x_1 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, -(signal_freq + scatter_center_freq), 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(tx_samp_rate, analog.GR_COS_WAVE, signal_freq, 1, 0, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
@@ -315,17 +278,16 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_binary_slicer_fb_0, 0))
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_time_sink_x_1, 0))
+        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_pfb_clock_sync_xxx_0, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.analog_sig_source_x_1, 0), (self.blocks_multiply_xx_0, 1))
-        self.connect((self.blocks_add_const_vxx_0, 0), (self.qtgui_time_sink_x_1, 1))
+        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.blocks_copy_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.blocks_copy_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_freq_sink_x_1, 0))
-        self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_add_const_vxx_0, 0))
-        self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_uchar_to_float_0, 0))
+        self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_add_const_vxx_0, 0))
+        self.connect((self.digital_pfb_clock_sync_xxx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.blocks_copy_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_multiply_xx_0, 0))
 
@@ -334,6 +296,30 @@ class top_block(gr.top_block, Qt.QWidget):
         self.settings = Qt.QSettings("GNU Radio", "top_block")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
+
+    def get_symbol_rate(self):
+        return self.symbol_rate
+
+    def set_symbol_rate(self, symbol_rate):
+        self.symbol_rate = symbol_rate
+        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
+        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
+
+    def get_filter_samp_rate(self):
+        return self.filter_samp_rate
+
+    def set_filter_samp_rate(self, filter_samp_rate):
+        self.filter_samp_rate = filter_samp_rate
+        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
+        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.filter_samp_rate)
+
+    def get_sps(self):
+        return self.sps
+
+    def set_sps(self, sps):
+        self.sps = sps
+        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
 
     def get_signal_freq_khz(self):
         return self.signal_freq_khz
@@ -407,20 +393,25 @@ class top_block(gr.top_block, Qt.QWidget):
         self.rx_gain = rx_gain
         self.uhd_usrp_source_0.set_gain(self.rx_gain, 0)
 
+    def get_rrc_taps(self):
+        return self.rrc_taps
+
+    def set_rrc_taps(self, rrc_taps):
+        self.rrc_taps = rrc_taps
+        self.digital_pfb_clock_sync_xxx_0.update_taps(self.rrc_taps)
+
+    def get_nfilts(self):
+        return self.nfilts
+
+    def set_nfilts(self, nfilts):
+        self.nfilts = nfilts
+
     def get_fsk_width_hz(self):
         return self.fsk_width_hz
 
     def set_fsk_width_hz(self, fsk_width_hz):
         self.fsk_width_hz = fsk_width_hz
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate, self.fsk_deviation_hz + self.fsk_width_hz, self.fsk_width_hz, firdes.WIN_HAMMING, 6.76))
-
-    def get_filter_samp_rate(self):
-        return self.filter_samp_rate
-
-    def set_filter_samp_rate(self, filter_samp_rate):
-        self.filter_samp_rate = filter_samp_rate
-        self.qtgui_time_sink_x_1.set_samp_rate(self.filter_samp_rate)
-        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.filter_samp_rate)
 
     def get_center_freq(self):
         return self.center_freq
