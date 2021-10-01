@@ -3,26 +3,20 @@
 from pprint import pprint
 from itertools import islice
 
-FILE = "bitstream_wired_message.txt"
+from colorama import Fore, Style
 
-PREAMBLE = "111101"
+import sys
 
-phy_bit_map = {
-    0: "10",
-    1: "01"
-}
+FILE = sys.argv[1]
 
-bit_phy_map = {
-    "10": "0",
-    "01": "1"
-}
+PREAMBLE = "1010110011100100"
 
-preamble_phy = ''.join(list(map(lambda x: phy_bit_map[int(x)], PREAMBLE)))
+EXPECTED_MSG = "The quick brown fox jumped over the lazy dog."
 
 with open(FILE) as f:
     bitstream = f.readline()
 
-print("Looking for", preamble_phy)
+print("Looking for", PREAMBLE)
 
 def chunks(lst, n):
     for i in range(0, len(lst), n):
@@ -32,29 +26,16 @@ def bin2str(b):
     return bytes(int(b[i : i+8], 2) for i in range(0, len(b), 8))
 
 # first, naive check: split on the preamble
-for w in bitstream.split(preamble_phy):
-    print(f"message of length {len(w)}")
+for w in bitstream.split(PREAMBLE):
+    print(f"\n>> message of length {len(w)}")
 
-    g = iter(w)
-    out = ""
+    # print("out:", w)
 
-    try:
-        while True:
-            b = next(g) + next(g)
-
-            while b not in bit_phy_map:
-                b = b[0] + next(g)
-
-
-            out += bit_phy_map[b]
-    except StopIteration:
-        pass
-
-    print("out:", out)
-
-    # for off in range(8):
-    #     byte_res = bin2str(out[off:])
-    #     try:
-    #         print(byte_res.decode())
-    #     except UnicodeDecodeError:
-    #         print("\t ## ", byte_res)
+    byte_res = bin2str(w)
+    print("\t", end='')
+    for ch in byte_res:
+        if not chr(ch).isprintable():
+            print(Fore.RED + '?' + Style.RESET_ALL, end='')
+        else:
+            print(chr(ch), end='')
+    print()

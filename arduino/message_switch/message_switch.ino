@@ -111,34 +111,20 @@ void setup() {
 // how long each FSK period is
 const int KEY_TIME_US = 250;
 
-// a is the higher frequency, b the lower.
-// -> a = 1
-//    b = 0
-
-// 10
 inline void send_zero() {
-  set_count(count_a);
-  delayMicroseconds(KEY_TIME_US);
   set_count(count_b);
   delayMicroseconds(KEY_TIME_US);
 }
 
-// 01
 inline void send_one() {
-  set_count(count_b);
-  delayMicroseconds(KEY_TIME_US);
   set_count(count_a);
   delayMicroseconds(KEY_TIME_US);
 }
 
-// preamble: 111101 or 010101011001
+// 1010110011100100
 inline void send_preamble() {
-  send_one();
-  send_one();
-  send_one();
-  send_one();
-  send_zero();
-  send_one();
+  send_byte(0xac);
+  send_byte(0xe4);
 }
 
 inline void send_bit(char b) {
@@ -170,13 +156,21 @@ inline void send_length() {
 }
 
 void loop() {
-  send_preamble();
+  send_one();
+  send_zero();
+  
+//  send_preamble();
+//
+//  for (int i = 0; i < 64; i++) {
+//    send_one();
+//    send_zero();
+//  }
 
-  send_length();
-
-  // loop through each byte...
-  for (const char * c = MESSAGE; *c; c++) {
-    // send each bit of each byte
-    send_byte(*c);
-  }
+//  send_length();
+//
+//  // loop through each byte...
+//  for (const char * c = MESSAGE; *c; c++) {
+//    // send each bit of each byte
+//    send_byte(*c);
+//  }
 }

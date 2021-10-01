@@ -17,7 +17,8 @@ void set_count(long c) {
   // rollover... so reset.
   // Mod looks cleaner than just setting to zero; tbd.
   if (TCNT1 >= c) {
-    TCNT1 %= c;
+//    TCNT1 %= c;
+    TCNT1 = 0;
   }
   
 }
