@@ -157,7 +157,7 @@ void setup() {
   // preamble 0xace4, 1010110011100100
   radio_buffer[p++] = (char)0xac;
   radio_buffer[p++] = (char)0xe4;
-  strlcpy(&radio_buffer[p], MESSAGE, strlen(MESSAGE));
+  strlcpy(&radio_buffer[p], MESSAGE, RADIO_BUFFER_MAX - 2);
 
   for (int i = 0; i < RADIO_BUFFER_MAX; i++) {
     Serial.println(radio_buffer[i], HEX);
