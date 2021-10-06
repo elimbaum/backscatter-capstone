@@ -48,7 +48,7 @@ def count_bits(w : bytes):
     return bin_repr.count('1')
 
 def bit_error(exp, act):
-    errors =  count_bits(bytes(map(operator.xor, byte_res, EXPECTED_MSG)))
+    errors = count_bits(bytes(map(operator.xor, byte_res, EXPECTED_MSG)))
 
     return errors / (8 * len(exp))
 
@@ -74,7 +74,7 @@ for w in bitstream.split(PREAMBLE):
         partial_decode_print(
             map(operator.xor, byte_res, EXPECTED_MSG),
             all_hex=True)
-        print(f"BER: {ber*100:6.3f} %")
+        print(f"BER: {ber*100:4.1f} %")
 
         
 
