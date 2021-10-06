@@ -58,13 +58,7 @@ char radio_buffer[RADIO_BUFFER_MAX];
 uint16_t rb_index = 0;
 uint8_t rb_bit_index = 0;
 
-inline void send_bit(char b) {
-  if (b) {
-    set_count(count_one);
-  } else {
-    set_count(count_zero);
-  }
-}
+
 
 ISR(TIMER2_COMPA_vect) {
   send_bit(radio_buffer[rb_index] & _BV(rb_bit_index));
