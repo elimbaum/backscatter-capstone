@@ -8,7 +8,7 @@ long count_one, count_zero;
 #include "fsk.h"
 #include "Arduino.h"
 
-char serial_buffer[256];
+static char serial_buffer[256];
 
 void setup_io() {
   pinMode(CTRL_1_PIN, OUTPUT);
@@ -70,6 +70,25 @@ void setup_timers(long req_center, long req_dev) {
 
   sprintf(serial_buffer, "Counts %ld %ld", low_count, high_count);
   Serial.println(serial_buffer);
+
+  count_one = high_count;
+  count_zero = low_count;
+
+  ///////////////////////////
+  // TURN ON THE TIMERS!
+  
+  // Set up baseband timer
+  // Toggle OC1B (pin 10) on timer compare
+  TCCR1A = _BV(COM1B0);
+  // CTC with no prescale
+  TCCR1B = _BV(WGM12) | _BV(CS10);
+
+  // Set up modulator timer (interrupt)
+  TCCR2A = _BV(WGM21); // CTC
+  TCCR2B = _BV(CS22); // 64 prescale
+  TIMSK2 = _BV(OCIE2A); // interrupt
+
+  OCR2A = BIT_OCR;
 }
 
 //inline void send_bit(char b) {
