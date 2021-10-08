@@ -26,8 +26,8 @@ int queue_count() {
   return _queue_count;
 }
 
+// TODO: prevent race condition, maybe need a lock
 bool enqueue(uint8_t item) {
-  noInterrupts();
   if (queue_is_full()) {
     // no more room.
     return false;
@@ -38,12 +38,9 @@ bool enqueue(uint8_t item) {
   }
   queue[++queue_tail] = item;
   _queue_count++;
-  
-  interrupts();
 }
 
 int dequeue() {
-  noInterrupts();
   if (queue_is_empty()) {
     return QUEUE_EMPTY;
   }
@@ -53,8 +50,6 @@ int dequeue() {
     queue_head = 0;
   }
   _queue_count--;
-  
-  interrupts();
-
+ 
   return item;
 }

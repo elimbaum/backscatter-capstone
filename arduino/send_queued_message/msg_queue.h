@@ -12,8 +12,11 @@
 
 #define QUEUE_EMPTY -1
 
+// Hamming(7, 4), so we're sending data bits slower than expected
+#define HAMMING_FACTOR (7.0 / 4)
+
 // how long it would take to send the whole queue
-#define MS_TO_SEND_QUEUE (1000L * _QUEUE_SIZE_BITS / BITS_PER_SECOND)
+#define MS_TO_SEND_QUEUE (1000L * HAMMING_FACTOR * _QUEUE_SIZE_BITS / BITS_PER_SECOND)
 
 /* how much we would like to refill the queue (higher
  * fractions mean we wait longer to refill)
