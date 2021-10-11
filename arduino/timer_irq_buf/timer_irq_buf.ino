@@ -1,14 +1,14 @@
 /* Send a message by modulating a signal.
- *  
- * In this version, use a timer interrupt for FSK modulation,
- * rather than pesky delays.
- * 
- * Timer 1 handles the baseband
- * Timer 2 handles the IRQ and modulation
- * 
- * Prescale of 64 with count 250 gives exactly 1 kHz.
- *  
- */
+
+   In this version, use a timer interrupt for FSK modulation,
+   rather than pesky delays.
+
+   Timer 1 handles the baseband
+   Timer 2 handles the IRQ and modulation
+
+   Prescale of 64 with count 250 gives exactly 1 kHz.
+
+*/
 
 #include "message.h"
 
@@ -33,7 +33,7 @@ inline void set_count(long c) {
   if (TCNT1 >= c) {
     TCNT1 %= c;
   }
-  
+
 }
 
 long count_from_freq(long freq) {
@@ -73,8 +73,8 @@ ISR(TIMER2_COMPA_vect) {
       rb_index = 0;
     }
   } else {
-    rb_bit_index--;  
-  }  
+    rb_bit_index--;
+  }
 }
 
 void setup() {
@@ -104,8 +104,8 @@ void setup() {
 
   Serial.print("Got "); Serial.print(actual_center_f);
   sprintf(serial_buffer, " (+%d, -%d) Hz",
-            (int)(actual_high_f - actual_center_f),
-            (int)(actual_center_f - actual_low_f));
+          (int)(actual_high_f - actual_center_f),
+          (int)(actual_center_f - actual_low_f));
   Serial.println(serial_buffer);
 
   sprintf(serial_buffer, "Counts %ld %ld", low_count, high_count);
@@ -133,8 +133,8 @@ void setup() {
   Serial.println(BIT_OCR);
 
   sprintf(serial_buffer, "Sending message %s (len %d)",
-            MESSAGE,
-            strlen(MESSAGE));
+          MESSAGE,
+          strlen(MESSAGE));
   Serial.println(serial_buffer);
 
   count_one = high_count;
@@ -159,7 +159,7 @@ void setup() {
 
   ///////////////////////////
   // TURN ON THE TIMERS!
-  
+
   // Set up baseband timer
   // Toggle OC1B (pin 10) on timer compare
   TCCR1A = _BV(COM1B0);
@@ -185,6 +185,6 @@ void setup() {
 //}
 
 void loop() {
-//  Serial.print(rb_index); Serial.print(" "); Serial.println(rb_bit_index);
-//  delay(200);
+  //  Serial.print(rb_index); Serial.print(" "); Serial.println(rb_bit_index);
+  //  delay(200);
 }

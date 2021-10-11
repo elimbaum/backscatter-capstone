@@ -27,8 +27,7 @@ def avr_random_gen(seed : int):
 
 g = avr_random_gen(0)
 
-print("Start:", next(g))
+# print("Start:", next(g))
 
-for skip_amt in [100, 1000, 10000, 10000]:
-    print(f"+{skip_amt}:", next(skip(g, skip_amt)))
-
+for _, n in zip(range(100), g):
+    print(f"{(n & 0xFF):2X}", end=' ')

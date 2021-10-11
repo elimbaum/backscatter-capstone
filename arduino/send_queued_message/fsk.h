@@ -17,4 +17,6 @@ double freq_from_count(long count);
 void setup_io();
 void setup_timers(long, long);
 
+void send_bit(char);
+
 #endif

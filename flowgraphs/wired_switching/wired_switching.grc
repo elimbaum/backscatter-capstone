@@ -412,7 +412,7 @@ blocks:
     affinity: ''
     alias: ''
     append: 'False'
-    comment: ''
+    comment: file output
     file: /Users/ebaum/Documents/capstone/repo/flowgraphs/wired_switching/bitstream_wired_message.txt
     type: byte
     unbuffered: 'False'
@@ -421,9 +421,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1624, 492.0]
+    coordinate: [1624, 476.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -490,6 +490,25 @@ blocks:
     coordinate: [1440, 448.0]
     rotation: 0
     state: disabled
+- name: blocks_udp_sink_0
+  id: blocks_udp_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    eof: 'True'
+    ipaddr: localhost
+    port: '7890'
+    psize: '1472'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1648, 596.0]
+    rotation: 0
+    state: true
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -1095,7 +1114,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1416, 772.0]
+    coordinate: [1416, 804.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -1219,7 +1238,7 @@ blocks:
     bus_structure: null
     coordinate: [1472, 252.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
@@ -1880,6 +1899,7 @@ connections:
 - [analog_sig_source_x_1, '0', blocks_multiply_xx_0, '1']
 - [band_pass_filter_0, '0', blocks_copy_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_file_sink_0, '0']
+- [blocks_add_const_vxx_0, '0', blocks_udp_sink_0, '0']
 - [blocks_copy_0, '0', analog_quadrature_demod_cf_0, '0']
 - [blocks_copy_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_copy_0, '0', qtgui_waterfall_sink_x_0, '0']

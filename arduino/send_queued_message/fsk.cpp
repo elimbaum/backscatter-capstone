@@ -88,13 +88,15 @@ void setup_timers(long req_center, long req_dev) {
   TCCR2B = _BV(CS22); // 64 prescale
   TIMSK2 = _BV(OCIE2A); // interrupt
 
+  set_count(count_zero);
+
   OCR2A = BIT_OCR;
 }
 
-//inline void send_bit(char b) {
-//  if (b) {
-//    set_count(count_one);
-//  } else {
-//    set_count(count_zero);
-//  }
-//}
+void send_bit(char b) {
+  if (b) {
+    set_count(count_one);
+  } else {
+    set_count(count_zero);
+  }
+}

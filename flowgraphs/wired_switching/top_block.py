@@ -184,40 +184,6 @@ class top_block(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(2, 3):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.qtgui_waterfall_sink_x_1 = qtgui.waterfall_sink_f(
-            1024, #size
-            firdes.WIN_BLACKMAN_hARRIS, #wintype
-            0, #fc
-            filter_samp_rate, #bw
-            "", #name
-            1 #number of inputs
-        )
-        self.qtgui_waterfall_sink_x_1.set_update_time(0.10)
-        self.qtgui_waterfall_sink_x_1.enable_grid(False)
-        self.qtgui_waterfall_sink_x_1.enable_axis_labels(True)
-
-
-        self.qtgui_waterfall_sink_x_1.set_plot_pos_half(not True)
-
-        labels = ['', '', '', '', '',
-                  '', '', '', '', '']
-        colors = [0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_waterfall_sink_x_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_waterfall_sink_x_1.set_line_label(i, labels[i])
-            self.qtgui_waterfall_sink_x_1.set_color_map(i, colors[i])
-            self.qtgui_waterfall_sink_x_1.set_line_alpha(i, alphas[i])
-
-        self.qtgui_waterfall_sink_x_1.set_intensity_range(-140, 10)
-
-        self._qtgui_waterfall_sink_x_1_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_1.pyqwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_1_win)
         self.qtgui_time_sink_x_1_0 = qtgui.time_sink_f(
             256, #size
             symbol_rate, #samp_rate
@@ -280,11 +246,10 @@ class top_block(gr.top_block, Qt.QWidget):
                 6.76))
         self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(sps, 6.28/100, rrc_taps, nfilts, 16, 1.5, 1)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
+        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_char*1, 'localhost', 7890, 1472, True)
         self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(enable_rx)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/Users/ebaum/Documents/capstone/repo/flowgraphs/wired_switching/bitstream_wired_message.txt', False)
-        self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_copy_0 = blocks.copy(gr.sizeof_gr_complex*1)
         self.blocks_copy_0.set_enabled(True)
         self.blocks_add_const_vxx_0 = blocks.add_const_bb(ord('0'))
@@ -297,10 +262,9 @@ class top_block(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_pfb_clock_sync_xxx_0, 0))
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_waterfall_sink_x_1, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.analog_sig_source_x_1, 0), (self.blocks_multiply_xx_0, 1))
-        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_udp_sink_0, 0))
         self.connect((self.blocks_copy_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
@@ -333,7 +297,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.filter_samp_rate = filter_samp_rate
         self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
         self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
-        self.qtgui_waterfall_sink_x_1.set_frequency_range(0, self.filter_samp_rate)
 
     def get_sps(self):
         return self.sps
