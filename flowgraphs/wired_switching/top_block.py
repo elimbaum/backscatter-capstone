@@ -23,14 +23,12 @@ if __name__ == '__main__':
 
 from PyQt5 import Qt
 from gnuradio import eng_notation
-from gnuradio import qtgui
-from gnuradio.filter import firdes
-import sip
 from gnuradio import analog
 import math
 from gnuradio import blocks
 from gnuradio import digital
 from gnuradio import filter
+from gnuradio.filter import firdes
 from gnuradio import gr
 import sys
 import signal
@@ -79,7 +77,7 @@ class top_block(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.symbol_rate = symbol_rate = 1e3
-        self.filter_samp_rate = filter_samp_rate = 25e3
+        self.filter_samp_rate = filter_samp_rate = 15e3
         self.sps = sps = int(filter_samp_rate/symbol_rate)
         self.signal_freq_khz = signal_freq_khz = 100
         self.scatter_freq_khz = scatter_freq_khz = 200.125
@@ -184,57 +182,6 @@ class top_block(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(2, 3):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.qtgui_time_sink_x_1_0 = qtgui.time_sink_f(
-            256, #size
-            symbol_rate, #samp_rate
-            "", #name
-            1 #number of inputs
-        )
-        self.qtgui_time_sink_x_1_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_1_0.set_y_axis(0, 2)
-
-        self.qtgui_time_sink_x_1_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_1_0.enable_tags(False)
-        self.qtgui_time_sink_x_1_0.set_trigger_mode(qtgui.TRIG_MODE_AUTO, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_1_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_1_0.enable_grid(False)
-        self.qtgui_time_sink_x_1_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_1_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_1_0.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, 2, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_1_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_1_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_1_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_1_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_1_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_1_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_1_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_1_0_win = sip.wrapinstance(self.qtgui_time_sink_x_1_0.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_time_sink_x_1_0_win, 4, 1, 1, 4)
-        for r in range(4, 5):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(1, 5):
-            self.top_grid_layout.setColumnStretch(c, 1)
         self.low_pass_filter_0 = filter.fir_filter_ccf(
             int(samp_rate/filter_samp_rate),
             firdes.low_pass(
@@ -247,7 +194,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(sps, 6.28/100, rrc_taps, nfilts, 16, 1.5, 1)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_char*1, 'localhost', 7890, 1472, True)
-        self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(enable_rx)
         self.blocks_copy_0 = blocks.copy(gr.sizeof_gr_complex*1)
@@ -268,9 +214,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_copy_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
-        self.connect((self.blocks_uchar_to_float_0, 0), (self.qtgui_time_sink_x_1_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_add_const_vxx_0, 0))
-        self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_uchar_to_float_0, 0))
         self.connect((self.digital_pfb_clock_sync_xxx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.blocks_copy_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_multiply_const_vxx_0, 0))
@@ -288,7 +232,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.symbol_rate = symbol_rate
         self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
         self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
-        self.qtgui_time_sink_x_1_0.set_samp_rate(self.symbol_rate)
 
     def get_filter_samp_rate(self):
         return self.filter_samp_rate

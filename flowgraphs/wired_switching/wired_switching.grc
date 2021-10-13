@@ -65,7 +65,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 25e3
+    value: 15e3
   states:
     bus_sink: false
     bus_source: false
@@ -474,7 +474,7 @@ blocks:
     bus_structure: null
     coordinate: [1456, 704.0]
     rotation: 180
-    state: enabled
+    state: disabled
 - name: blocks_uchar_to_float_1
   id: blocks_uchar_to_float
   parameters:
@@ -495,7 +495,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: 'in a terminal run
+
+      nc -luk PORT'
     eof: 'True'
     ipaddr: localhost
     port: '7890'
@@ -508,7 +510,7 @@ blocks:
     bus_structure: null
     coordinate: [1648, 596.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -1116,7 +1118,7 @@ blocks:
     bus_structure: null
     coordinate: [1416, 804.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_waterfall_sink_x_0
   id: qtgui_waterfall_sink_x
   parameters:

@@ -25,7 +25,7 @@ inline void set_count(long c) {
   // rollover... so reset.
   // Mod looks cleaner than just setting to zero; tbd.
   if (TCNT1 >= c) {
-    TCNT1 %= c;
+    TCNT1 = 0;
   }
   
 }
@@ -93,10 +93,15 @@ void setup_timers(long req_center, long req_dev) {
   OCR2A = BIT_OCR;
 }
 
+unsigned long b0 = 0;
+unsigned long b1 = 0;
+
 void send_bit(char b) {
   if (b) {
+    b1++;
     set_count(count_one);
   } else {
+    b0++;
     set_count(count_zero);
   }
 }

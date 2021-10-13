@@ -15,6 +15,8 @@ static char serial_buffer[256];
 const long REQ_CENTER_FREQ = 200000;
 const long REQ_DEV_FREQ    =   5000;
 
+unsigned long start_t;
+
 void setup() {
   Serial.begin(115200);
   Serial.println("\n====");
@@ -30,20 +32,37 @@ void setup() {
 
   randomSeed(0);
   Serial.flush();
+
+  start_t = millis();
 }
+
+extern unsigned long b0, b1;
+
+unsigned char d = 0;
 
 void loop() {
   // put your main code here, to run repeatedly:
 
   int spots = queue_empty_spots();
+
+//  unsigned long elapsed = millis() - start_t;
+//  sprintf(serial_buffer, "Sent %ld bits in %ld ms (%d per)", bits_sent, elapsed, bits_sent / elapsed);
+
+  sprintf(serial_buffer, "0: %ld, 1: %ld, ratio %ld", b0, b1, 100 * b0 / (b0 + b1));
+  Serial.println(serial_buffer);
+
   sprintf(serial_buffer, "Filling %d spots in queue", spots);
+ 
   Serial.println(serial_buffer);
   for (int i = 0; i < spots; i++) {
-    unsigned char r = random();
+    unsigned char r;
+//    r = random();
+    r = d;
     enqueue(r);
-    Serial.print(r, HEX); Serial.print(" ");
+    d++;
+//    Serial.print(r, HEX); Serial.print(" ");
   }
-  Serial.println();
+//  Serial.println();
 
   delay(QUEUE_REFILL_MS);
 }
@@ -61,7 +80,7 @@ ISR(TIMER2_COMPA_vect) {
     if (d == QUEUE_EMPTY) {
       // try again next interrupt.
       Serial.println("Q");
-      digitalWrite(13, HIGH);
+//      digitalWrite(13, HIGH);
       return;
     }
 
@@ -71,7 +90,6 @@ ISR(TIMER2_COMPA_vect) {
 //    Serial.println(serial_buffer);
 //    
     bit_index = 0;
-    digitalWrite(13, LOW);
 
     // generate hamming-encoded byte
     char hi = ud >> 4;
@@ -84,6 +102,6 @@ ISR(TIMER2_COMPA_vect) {
     bit_index = HAMMING_SIZE * 2 - 1;
   }
 //  Serial.println(!!(hamming_data & _BV(bit_index)));
-  send_bit(hamming_data & _BV(bit_index));
+  send_bit(!!(hamming_data & _BV(bit_index)));
   bit_index--;
 }
