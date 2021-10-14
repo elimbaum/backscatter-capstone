@@ -58,6 +58,7 @@ void loop() {
     unsigned char r;
 //    r = random();
     r = d;
+//    r = 0xdd;
     enqueue(r);
     d++;
 //    Serial.print(r, HEX); Serial.print(" ");
