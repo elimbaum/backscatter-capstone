@@ -70,21 +70,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [72, 564.0]
+    coordinate: [64, 700.0]
     rotation: 0
     state: enabled
-- name: fsk_deviation_hz
-  id: variable
-  parameters:
-    comment: ''
-    value: 5e3
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 572.0]
-    rotation: 0
-    state: disabled
 - name: fsk_deviation_hz
   id: variable_qtgui_entry
   parameters:
@@ -92,12 +80,12 @@ blocks:
     gui_hint: 1,3,1,1
     label: ''
     type: real
-    value: 5.003e3
+    value: 5.00e3
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 436.0]
+    coordinate: [64, 572.0]
     rotation: 0
     state: enabled
 - name: fsk_width_hz
@@ -109,7 +97,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [88, 500.0]
+    coordinate: [80, 636.0]
     rotation: 0
     state: enabled
 - name: nfilts
@@ -184,7 +172,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 92.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: scatter_freq_khz
   id: variable_qtgui_entry
   parameters:
@@ -199,7 +187,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 12.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: signal_freq
   id: variable
   parameters:
@@ -211,7 +199,7 @@ blocks:
     bus_structure: null
     coordinate: [416, 92.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: signal_freq_khz
   id: variable_qtgui_entry
   parameters:
@@ -319,9 +307,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [32, 236.0]
+    coordinate: [32, 220.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: analog_sig_source_x_1
   id: analog_sig_source_x
   parameters:
@@ -341,9 +329,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 412.0]
+    coordinate: [296, 436.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: band_pass_filter_0
   id: band_pass_filter
   parameters:
@@ -384,7 +372,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 540.0]
+    coordinate: [1536, 620.0]
     rotation: 0
     state: disabled
 - name: blocks_copy_0
@@ -421,9 +409,31 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1624, 476.0]
+    coordinate: [1728, 492.0]
     rotation: 0
     state: disabled
+- name: blocks_file_source_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: pmt.PMT_NIL
+    comment: ''
+    file: /Users/ebaum/Documents/capstone/repo/processing/hamming-test/hamming-dd-bp-s15k.iq
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'True'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 308.0]
+    rotation: 0
+    state: enabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -439,9 +449,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 324.0]
+    coordinate: [672, 308.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -457,9 +467,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 492.0]
+    coordinate: [1256, 492.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_multiply_const_vxx_2
   id: blocks_multiply_const_vxx
   parameters:
@@ -475,9 +485,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 596.0]
+    coordinate: [1320, 620.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
   parameters:
@@ -495,7 +505,7 @@ blocks:
     bus_structure: null
     coordinate: [768, 360.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_repeat_0
   id: blocks_repeat
   parameters:
@@ -511,9 +521,28 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1240, 668.0]
+    coordinate: [1248, 684.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: blocks_throttle_1
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: filter_samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 372.0]
+    rotation: 0
+    state: enabled
 - name: blocks_uchar_to_float_0
   id: blocks_uchar_to_float
   parameters:
@@ -526,7 +555,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1408, 656.0]
+    coordinate: [1448, 704.0]
     rotation: 180
     state: disabled
 - name: blocks_uchar_to_float_1
@@ -541,9 +570,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 488.0]
+    coordinate: [1448, 472.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_udp_sink_0
   id: blocks_udp_sink
   parameters:
@@ -562,7 +591,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1648, 596.0]
+    coordinate: [1696, 620.0]
     rotation: 0
     state: disabled
 - name: digital_binary_slicer_fb_0
@@ -577,7 +606,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 544.0]
+    coordinate: [1280, 576.0]
     rotation: 0
     state: disabled
 - name: digital_binary_slicer_fb_1
@@ -592,9 +621,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1288, 448.0]
+    coordinate: [1288, 440.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -617,7 +646,7 @@ blocks:
     bus_structure: null
     coordinate: [984, 556.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_pfb_clock_sync_xxx_0_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -664,7 +693,7 @@ blocks:
     bus_structure: null
     coordinate: [696, 452.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -1057,7 +1086,7 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '3'
-    size: '256'
+    size: '1024'
     srate: filter_samp_rate
     stemplot: 'False'
     style1: '1'
@@ -1077,7 +1106,7 @@ blocks:
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '""'
     type: float
-    update_time: '0.10'
+    update_time: '0.02'
     width1: '1'
     width10: '1'
     width2: '1'
@@ -1089,8 +1118,8 @@ blocks:
     width8: '1'
     width9: '1'
     ylabel: Amplitude
-    ymax: '2'
-    ymin: '-2'
+    ymax: '5'
+    ymin: '-5'
     yunit: '""'
   states:
     bus_sink: false
@@ -1592,9 +1621,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [248, 292.0]
-    rotation: 0
-    state: true
+    coordinate: [24, 348.0]
+    rotation: 180
+    state: disabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -1964,9 +1993,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 164.0]
+    coordinate: [408, 156.0]
     rotation: 0
-    state: true
+    state: disabled
 
 connections:
 - [analog_quadrature_demod_cf_0, '0', digital_binary_slicer_fb_1, '0']
@@ -1983,21 +2012,24 @@ connections:
 - [blocks_copy_0, '0', analog_quadrature_demod_cf_0, '0']
 - [blocks_copy_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_copy_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [blocks_file_source_0, '0', blocks_throttle_1, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_1, '1']
-- [blocks_multiply_const_vxx_2, '0', qtgui_time_sink_x_1, '2']
+- [blocks_multiply_const_vxx_2, '0', qtgui_time_sink_x_1, '1']
 - [blocks_multiply_xx_0, '0', band_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_freq_sink_x_1, '0']
 - [blocks_repeat_0, '0', blocks_multiply_const_vxx_2, '0']
+- [blocks_throttle_1, '0', blocks_copy_0, '0']
 - [blocks_uchar_to_float_0, '0', qtgui_time_sink_x_1_0, '0']
-- [blocks_uchar_to_float_1, '0', qtgui_time_sink_x_1, '1']
+- [blocks_uchar_to_float_1, '0', qtgui_time_sink_x_1, '2']
 - [digital_binary_slicer_fb_0, '0', blocks_add_const_vxx_0, '0']
 - [digital_binary_slicer_fb_0, '0', blocks_uchar_to_float_0, '0']
 - [digital_binary_slicer_fb_1, '0', blocks_uchar_to_float_1, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', blocks_multiply_const_vxx_1, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', blocks_repeat_0, '0']
+- [digital_pfb_clock_sync_xxx_0_0, '0', digital_binary_slicer_fb_0, '0']
 - [low_pass_filter_0, '0', blocks_copy_0, '0']
 - [uhd_usrp_source_0, '0', blocks_multiply_const_vxx_0, '0']
 - [uhd_usrp_source_0, '0', qtgui_time_sink_x_0, '0']

@@ -57,8 +57,8 @@ void loop() {
   for (int i = 0; i < spots; i++) {
     unsigned char r;
 //    r = random();
-    r = d;
-//    r = 0xdd;
+//    r = d;
+    r = 0xdd;
     enqueue(r);
     d++;
 //    Serial.print(r, HEX); Serial.print(" ");
