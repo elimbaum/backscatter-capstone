@@ -139,8 +139,8 @@ blocks:
     rangeType: float
     start: '0'
     step: '1'
-    stop: '70'
-    value: '35'
+    stop: '100'
+    value: '60'
     widget: counter_slider
   states:
     bus_sink: false
@@ -309,7 +309,7 @@ blocks:
     bus_structure: null
     coordinate: [32, 220.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: analog_sig_source_x_1
   id: analog_sig_source_x
   parameters:
@@ -331,7 +331,7 @@ blocks:
     bus_structure: null
     coordinate: [296, 436.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: band_pass_filter_0
   id: band_pass_filter
   parameters:
@@ -433,7 +433,7 @@ blocks:
     bus_structure: null
     coordinate: [288, 308.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -451,7 +451,7 @@ blocks:
     bus_structure: null
     coordinate: [672, 308.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -487,7 +487,7 @@ blocks:
     bus_structure: null
     coordinate: [1320, 620.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
   parameters:
@@ -505,7 +505,26 @@ blocks:
     bus_structure: null
     coordinate: [768, 360.0]
     rotation: 0
-    state: disabled
+    state: enabled
+- name: blocks_null_source_0
+  id: blocks_null_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_source: '[[0,],]'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1120, 408.0]
+    rotation: 0
+    state: true
 - name: blocks_repeat_0
   id: blocks_repeat
   parameters:
@@ -523,7 +542,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 684.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_throttle_1
   id: blocks_throttle
   parameters:
@@ -542,7 +561,7 @@ blocks:
     bus_structure: null
     coordinate: [528, 372.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_uchar_to_float_0
   id: blocks_uchar_to_float
   parameters:
@@ -669,7 +688,7 @@ blocks:
     bus_structure: null
     coordinate: [984, 700.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: low_pass_filter_0
   id: low_pass_filter
   parameters:
@@ -677,7 +696,7 @@ blocks:
     alias: ''
     beta: '6.76'
     comment: ''
-    cutoff_freq: fsk_deviation_hz + fsk_width_hz
+    cutoff_freq: fsk_deviation_hz * 2
     decim: int(samp_rate/filter_samp_rate)
     gain: '1'
     interp: '1'
@@ -693,7 +712,7 @@ blocks:
     bus_structure: null
     coordinate: [696, 452.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -729,7 +748,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: 3,1,1,4
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -773,7 +792,7 @@ blocks:
     bus_structure: null
     coordinate: [1184, 124.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_1
   id: qtgui_freq_sink_x
   parameters:
@@ -1030,7 +1049,7 @@ blocks:
     bus_structure: null
     coordinate: [816, 172.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_1
   id: qtgui_time_sink_x
   parameters:
@@ -1062,7 +1081,7 @@ blocks:
     ctrlpanel: 'True'
     entags: 'False'
     grid: 'False'
-    gui_hint: 3,1,1,4
+    gui_hint: 4,1,1,4
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -1086,7 +1105,7 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '3'
-    size: '1024'
+    size: '256'
     srate: filter_samp_rate
     stemplot: 'False'
     style1: '1'
@@ -1623,7 +1642,7 @@ blocks:
     bus_structure: null
     coordinate: [24, 348.0]
     rotation: 180
-    state: disabled
+    state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -1995,7 +2014,7 @@ blocks:
     bus_structure: null
     coordinate: [408, 156.0]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [analog_quadrature_demod_cf_0, '0', digital_binary_slicer_fb_1, '0']
@@ -2019,6 +2038,7 @@ connections:
 - [blocks_multiply_xx_0, '0', band_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_freq_sink_x_1, '0']
+- [blocks_null_source_0, '0', qtgui_time_sink_x_1, '1']
 - [blocks_repeat_0, '0', blocks_multiply_const_vxx_2, '0']
 - [blocks_throttle_1, '0', blocks_copy_0, '0']
 - [blocks_uchar_to_float_0, '0', qtgui_time_sink_x_1_0, '0']

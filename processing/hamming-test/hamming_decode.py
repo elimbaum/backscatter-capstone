@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 from functools import reduce
 import operator as op
@@ -34,22 +36,59 @@ def hamming_syndrome(w):
 with open(FILE) as f:
     bits = f.read()
 
-out = []
 
-for sword in chunks(bits, HAMMING_SIZE):
-    word = int(sword[::-1], 2)
-    syn = hamming_syndrome(sword)
-    if syn:
-        corrected = word ^ (1 << (syn - 1))
-        b = hamming_decode(corrected)
-        print(f"{bin(word):>9} ({word:02x}) syn {syn} -> {corrected:02x} =  "
-              f"{b:x}")
-    else:
-        b = hamming_decode(word)
-        print(f"{bin(word):>9} ({word:02x}) =              "
-              f"{b:x}")
-    
-    out.append(b)
+def decode(bits, offset, doprint=True):
+    out = []
+    n_errors = 0
+    bits = bits[offset:]
+    for sword in chunks(bits, HAMMING_SIZE):
+        word = int(sword, 2)
+        syn = hamming_syndrome(sword)
+        if syn:
+            corrected = word ^ (1 << (syn - 1))
+            b = hamming_decode(corrected)
+            if doprint:
+                print(
+                    f"{bin(word):>9} ({word:02x}) syn {syn} -> "
+                    f"{corrected:02x} =  {b:x}"
+                )
+            n_errors += 1
+        else:
+            b = hamming_decode(word)
+            if doprint:
+                print(
+                    f"{bin(word):>9} ({word:02x}) = "
+                    f"{b:x}"
+                )
+        
+        out.append(b)
+
+    return n_errors, out
+
+def argmin(L):
+    best_i = -1
+    best_v = -1
+
+    for i, v in enumerate(L):
+        if v < best_v:
+            best_i = i
+            best_v = v
+
+    return best_i
+
+offset_guesses = []
+
+for off in range(HAMMING_SIZE):
+    n_correct, _ = decode(bits, off, doprint=False)
+    print(f"offset {off} -> {n_correct} errors")
+
+    offset_guesses.append(n_correct)
+
+print(argmin(offset_guesses))
+
+OFFSET = 3
+
+n_correct, out = decode(bits, OFFSET)
 
 last = None
 for i, k in enumerate(chunks(out, 2)):

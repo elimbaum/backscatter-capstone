@@ -7,6 +7,8 @@
 #include "msg_queue.h"
 #include "hamming.h"
 
+#define DO_INCREMENT
+
 static char serial_buffer[256];
 
 /* Frequency requests.
@@ -21,6 +23,10 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\n====");
   Serial.println("backscatter: queued message test\n\n");
+
+  #ifdef DO_INCREMENT
+  Serial.println("doing increment");
+  #endif
 
   Serial.println("press enter to start...");
   while (! Serial.available()) { }
@@ -56,11 +62,13 @@ void loop() {
   Serial.println(serial_buffer);
   for (int i = 0; i < spots; i++) {
     unsigned char r;
-//    r = random();
-//    r = d;
+#ifdef DO_INCREMENT
+    r = d++;
+#else
     r = 0xdd;
+#endif
     enqueue(r);
-    d++;
+
 //    Serial.print(r, HEX); Serial.print(" ");
   }
 //  Serial.println();
