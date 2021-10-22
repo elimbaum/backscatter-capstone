@@ -8,10 +8,11 @@ void setup() {
 
   srandom(0);
 
-  Serial.print("Start: "); Serial.println(random());
+//  Serial.print("Start: "); Serial.println(random());
 
   for (int i = 0; i < 100; i++) {
-    random();
+    Serial.print((uint8_t)random(), HEX);
+    Serial.print(" ");
   }
 
   Serial.print("+100: "); Serial.println(random());

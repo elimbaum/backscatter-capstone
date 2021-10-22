@@ -160,7 +160,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.blocks_multiply_const_vxx_0_0_0 = blocks.multiply_const_ff(0.25)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_ff(0.25)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(0.25)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/Users/ebaum/Documents/capstone/repo/processing/hamming-test/hamming-dd-lp-s15k.iq', True, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/Users/ebaum/Documents/capstone/repo/processing/hamming-test/hamming-preamb-inc-lp-s15k.iq', False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_add_const_vxx_3 = blocks.add_const_ff(-1)
         self.blocks_add_const_vxx_2 = blocks.add_const_ff(-3)

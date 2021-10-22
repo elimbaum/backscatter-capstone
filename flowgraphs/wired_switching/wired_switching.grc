@@ -140,7 +140,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '100'
-    value: '60'
+    value: '80'
     widget: counter_slider
   states:
     bus_sink: false
@@ -790,7 +790,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1184, 124.0]
+    coordinate: [1200, 116.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_1
@@ -1049,7 +1049,7 @@ blocks:
     bus_structure: null
     coordinate: [816, 172.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_1
   id: qtgui_time_sink_x
   parameters:

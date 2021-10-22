@@ -15,10 +15,10 @@ def get_bit(v, i):
 
 def hamming_decode(w):
     return (
-        get_bit(w, 4) << 0 | 
-        get_bit(w, 2) << 1 | 
-        get_bit(w, 1) << 2 | 
-        get_bit(w, 0) << 3
+        get_bit(w, 4) << 3 | 
+        get_bit(w, 2) << 2 | 
+        get_bit(w, 1) << 1 | 
+        get_bit(w, 0) << 0
     )
 
 def chunks(lst, n):
@@ -65,12 +65,14 @@ def decode(bits, offset, doprint=True):
 
     return n_errors, out
 
+# argmin use
+# min(enumerate(a), key=itemgetter(1))[0]
 def argmin(L):
     best_i = -1
-    best_v = -1
+    best_v = None
 
     for i, v in enumerate(L):
-        if v < best_v:
+        if best_v is None or v < best_v:
             best_i = i
             best_v = v
 
@@ -79,28 +81,47 @@ def argmin(L):
 offset_guesses = []
 
 for off in range(HAMMING_SIZE):
-    n_correct, _ = decode(bits, off, doprint=False)
+    # check hamming against the first chunk of bits
+    n_correct, _ = decode(bits[:512], off, doprint=False)
     print(f"offset {off} -> {n_correct} errors")
 
     offset_guesses.append(n_correct)
 
-print(argmin(offset_guesses))
+best = argmin(offset_guesses)
 
-OFFSET = 3
+print("using offset:", best, "\n")
 
-n_correct, out = decode(bits, OFFSET)
+OFFSET = best
+
+n_correct, out = decode(bits, OFFSET, doprint=True)
+
+n_in_pattern = 0
+n_bytes = 0
 
 last = None
 for i, k in enumerate(chunks(out, 2)):
+    if len(k) != 2:
+        break
+
+    n_bytes += 1
+
     full = (k[0] << 4) + k[1]
 
-    correct = False
-    if full - 1 == last:
-        correct = True
-        print(Fore.GREEN, end='')
-        
-    print(f"{i:3} {k[0]:x}{k[1]:x} = {full:3}")
+    if full - 1 == last or (last == 255 and full == 0):
+        if correct == False:
+            # just moved into a correct region. assume last one was correct.
+            n_in_pattern += 1
 
-    print(Style.RESET_ALL, end='')
+        correct = True
+        # print(Fore.GREEN, end='')
+        n_in_pattern += 1
+    else:
+        correct = False
+
+    # print(f"{i:3} {k[0]:x}{k[1]:x} = {full:3}")
+
+    # print(Style.RESET_ALL, end='')
 
     last = full
+
+print(f"{n_in_pattern} out of {n_bytes} ({100 * n_in_pattern/n_bytes:.2f}%)")

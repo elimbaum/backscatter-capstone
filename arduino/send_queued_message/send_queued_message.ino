@@ -27,6 +27,17 @@ void setup() {
   #ifdef DO_INCREMENT
   Serial.println("doing increment");
   #endif
+  
+  #ifdef DO_RANDOM
+  Serial.println("doing random");
+  #endif
+
+  // print_hamming_table();
+
+  // send some alternating bits (hamming encoded, 14 bits per byte) preamble
+  for (int i = 0; i < NUM_PREAMB; i++) {
+    enqueue(0xd2);
+  }
 
   Serial.println("press enter to start...");
   while (! Serial.available()) { }
@@ -51,22 +62,29 @@ void loop() {
 
   int spots = queue_empty_spots();
 
-//  unsigned long elapsed = millis() - start_t;
-//  sprintf(serial_buffer, "Sent %ld bits in %ld ms (%d per)", bits_sent, elapsed, bits_sent / elapsed);
+  unsigned long elapsed = millis() - start_t;
+  Serial.println(elapsed);
 
-  sprintf(serial_buffer, "0: %ld, 1: %ld, ratio %ld", b0, b1, 100 * b0 / (b0 + b1));
-  Serial.println(serial_buffer);
+//  sprintf(serial_buffer, "0: %ld, 1: %ld, ratio %ld", b0, b1, 100 * b0 / (b0 + b1));
+//  Serial.println(serial_buffer);
 
   sprintf(serial_buffer, "Filling %d spots in queue", spots);
  
   Serial.println(serial_buffer);
   for (int i = 0; i < spots; i++) {
     unsigned char r;
-#ifdef DO_INCREMENT
+    
+    #ifdef DO_INCREMENT
     r = d++;
-#else
-    r = 0xdd;
-#endif
+    #else
+      #ifdef DO_RANDOM
+      r = random();
+      #else
+      // alternating bits
+      r = 0xd2;
+      #endif
+    #endif
+    
     enqueue(r);
 
 //    Serial.print(r, HEX); Serial.print(" ");
