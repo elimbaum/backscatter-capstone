@@ -95,6 +95,46 @@ table_control_5b6b = {
     "28": FlipCW("001111") 
 }
 
-for d, cw in table_data_3b4b.items():
-    print(d, bin(cw.get(-1)))
-    print(" ", d, bin(cw.get(1)))
+def write_tables():
+    print("DATA\tCODE\tOTHER_CODE")
+    for d, cw in table_data_3b4b.items():
+        rd_neg_1 = cw.get(-1)
+        rd_pos_1 = cw.get(1)
+        
+        out = f"D.x.{d}\t{cw.get(-1):04b}"
+        if rd_neg_1 != rd_pos_1:
+            out += '\tFLIP'
+        
+        print(out)
+
+    for d, cw in table_control_3b4b.items():
+        rd_neg_1 = cw.get(-1)
+        rd_pos_1 = cw.get(1)
+        
+        out = f"K.x.{d}\t{cw.get(-1):04b}"
+        if rd_neg_1 != rd_pos_1:
+            out += '\tFLIP'
+        
+        print(out)
+
+    for d, cw in table_data_5b6b.items():
+        rd_neg_1 = cw.get(-1)
+        rd_pos_1 = cw.get(1)
+        
+        out = f"D.{d}.y\t{cw.get(-1):06b}"
+        if rd_neg_1 != rd_pos_1:
+            out += '\tFLIP'
+        
+        print(out)
+
+    for d, cw in table_control_5b6b.items():
+        rd_neg_1 = cw.get(-1)
+        rd_pos_1 = cw.get(1)
+        
+        out = f"K.{d}.y\t{cw.get(-1):06b}"
+        if rd_neg_1 != rd_pos_1:
+            out += '\tFLIP'
+        
+        print(out)
+
+write_tables()
