@@ -15,7 +15,7 @@ class Codeword():
         bitlen = len(cw_str)
         self.cw = int(cw_str, 2)
         self.mask = (1 << bitlen) - 1
-        self.flip = False
+        self.flip = flip
     
     def get(self, rd):
         if rd == -1 or not self.flip:
@@ -24,8 +24,8 @@ class Codeword():
             return (~self.cw) & self.mask
 
 class FlipCW(Codeword):
-    def __init__(self, cw, bitlen):
-        super(cw, flip=True)
+    def __init__(self, cw):
+        super().__init__(cw, flip=True)
 
 class SameCW(Codeword):
     pass
@@ -94,3 +94,7 @@ table_data_5b6b = {
 table_control_5b6b = {
     "28": FlipCW("001111") 
 }
+
+for d, cw in table_data_3b4b.items():
+    print(d, bin(cw.get(-1)))
+    print(" ", d, bin(cw.get(1)))
