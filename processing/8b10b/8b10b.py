@@ -9,6 +9,10 @@ from typing import NamedTuple
 
 CODEWORD_FILE = '8b10b.tsv'
 
+HI_SIZE = 6
+LO_SIZE = 4
+CODEWORD_SIZE = HI_SIZE + LO_SIZE
+
 class CodewordType(Enum):
     CONTROL = auto()
     DATA = auto()
@@ -24,9 +28,11 @@ codewords = {
     }
 }
 
-
+# 12 control codes, including commas: K.28.1, K.28.5, K.28.7
 CONTROL_CODES = (0x1C, 0x3C, 0x5C, 0x7C, 0x9C, 0xBC,
                  0xDC, 0xFC, 0xF7, 0xFB, 0xFD, 0xFE)
+
+RUNNING_DISPARITY = -1
 
 def _8b10b_HGF(v: int) -> int:
     return (v >> 5) & 0x7
@@ -34,7 +40,22 @@ def _8b10b_HGF(v: int) -> int:
 def _8b10b_EDCBA(v: int) -> int:
     return v & 0x1f
 
-def encode_8b10b(cw_type: CodewordType, val: int, rd: int = -1):
+def popcount(b: int) -> int:
+    return bin(b).count('1')
+
+# look up in tuple
+def rd_to_index(rd: int) -> int:
+    if rd == -1:
+        return 0
+    elif rd == 1:
+        return 1
+
+def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
+    global RUNNING_DISPARITY
+
+    if rd is None:
+        rd = RUNNING_DISPARITY
+
     # compute special case for D.x.*7
     # we store this at index 8
     x = _8b10b_EDCBA(val)
@@ -47,18 +68,23 @@ def encode_8b10b(cw_type: CodewordType, val: int, rd: int = -1):
         if use_alt:
             y = 8
     
-    mapping = codewords[cw_type]
-    rd_idx = 0 if rd == -1 else 1
-
-    lo = mapping['y'][y][rd_idx]
-    print(mapping['y'][y])
+    hi_mapping = lo_mapping = codewords[cw_type]
 
     # we reuse many of the control chars
-    if cw_type == CodewordType.CONTROL and x not in mapping['x']:
-        mapping = codewords[CodewordType.DATA]
-    hi = mapping['x'][x][rd_idx]
+    if cw_type == CodewordType.CONTROL and x not in hi_mapping['x']:
+        hi_mapping = codewords[CodewordType.DATA]
+        
+    hi = hi_mapping['x'][x][rd_to_index(RUNNING_DISPARITY)]
+    pc = popcount(hi)
+    RUNNING_DISPARITY += pc - (HI_SIZE - pc)
     
-    return hi << 4 | lo
+    lo = lo_mapping['y'][y][rd_to_index(RUNNING_DISPARITY)]
+    pc = popcount(lo)
+    RUNNING_DISPARITY += pc - (LO_SIZE - pc)
+
+    res = hi << 4 | lo
+
+    return res
 
 with open(CODEWORD_FILE) as f:
     header = f.readline().split()
@@ -102,9 +128,11 @@ with open(CODEWORD_FILE) as f:
     
 print("data codes")
 for v in range(0xFF):
-    print("d", v, encode_8b10b(CodewordType.DATA, v, -1))
+    enc = encode_8b10b(CodewordType.DATA, v, -1)
+    print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
 
 print("control codes")
 for v in CONTROL_CODES:
     enc = encode_8b10b(CodewordType.CONTROL, v, -1)
     print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+
