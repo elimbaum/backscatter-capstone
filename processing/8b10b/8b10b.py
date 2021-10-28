@@ -7,6 +7,7 @@ from enum import Enum, auto
 from collections import namedtuple
 from typing import NamedTuple
 from random import randint
+import sys
 
 CODEWORD_FILE = '8b10b.tsv'
 
@@ -64,7 +65,7 @@ def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
 
     # print("D", x, y)
 
-    if y == 7:
+    if cw_type == CodewordType.DATA and y == 7:
         use_alt = (
             (rd == -1 and x in (17, 18, 20))
             or (rd == 1 and x in (11, 13, 14)
@@ -130,15 +131,20 @@ with open(CODEWORD_FILE) as f:
 
         codewords[cw_type][f][v] = (neg_cw, pos_cw)
     
-print("data codes")
-for v in range(0xFF):
+print("data")
+for v in range(0xFF + 1):
     enc = encode_8b10b(CodewordType.DATA, v)
-    print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+    # print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+    print(f"{v:3} -> {enc:3} ~ {enc:b}")
 
-print("control codes")
-for v in CONTROL_CODES:
+print("control")
+# for v in CONTROL_CODES:
+for v in range(0xFF + 1):
     enc = encode_8b10b(CodewordType.CONTROL, v)
-    print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+    # print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+    print(f"{v:3} -> {enc:3} ~ {enc:b}")
+
+sys.exit()
 
 RUNNING_DISPARITY = -1
 
