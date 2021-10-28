@@ -6,6 +6,7 @@
 from enum import Enum, auto
 from collections import namedtuple
 from typing import NamedTuple
+from random import randint
 
 CODEWORD_FILE = '8b10b.tsv'
 
@@ -60,6 +61,9 @@ def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
     # we store this at index 8
     x = _8b10b_EDCBA(val)
     y = _8b10b_HGF(val)
+
+    # print("D", x, y)
+
     if y == 7:
         use_alt = (
             (rd == -1 and x in (17, 18, 20))
@@ -128,11 +132,45 @@ with open(CODEWORD_FILE) as f:
     
 print("data codes")
 for v in range(0xFF):
-    enc = encode_8b10b(CodewordType.DATA, v, -1)
+    enc = encode_8b10b(CodewordType.DATA, v)
     print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
 
 print("control codes")
 for v in CONTROL_CODES:
-    enc = encode_8b10b(CodewordType.CONTROL, v, -1)
+    enc = encode_8b10b(CodewordType.CONTROL, v)
     print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
 
+RUNNING_DISPARITY = -1
+
+print("starting random test")
+stream = []
+n_check = 0
+last_check = 0
+while True:
+    v = randint(0, 0xFF)
+    enc = encode_8b10b(CodewordType.DATA, v)
+    stream.append(enc)
+
+    bin_stream = ''.join(f"{e:010b}" for e in stream)
+    # print(bin_stream)
+
+    try:
+        assert "0" * 6 not in bin_stream
+        assert "1" * 6 not in bin_stream
+        assert "00111110" not in bin_stream
+        assert "11000001" not in bin_stream
+    except AssertionError:
+        print(bin_stream)
+        print(n_check, "were ok")
+        break
+
+    n_check += 1
+
+    if len(stream) > 4:
+        stream.pop(0)
+
+    if n_check >= last_check * 8:
+        print(n_check, "checked, ok")
+        last_check = n_check
+
+    
