@@ -137,4 +137,22 @@ def write_tables():
         
         print(out)
 
-write_tables()
+def write_c_arrays():
+    print("const uint8_t table_5b6b[][2] = {")
+    for _, cw in table_data_5b6b.items():
+        print("\t{" f"0x{cw.get(-1):02x}, 0x{cw.get(1):02x}" "},")
+    print("};\n")
+
+    print("const uint8_t table_data_3b4b[][2] = {")
+    for _, cw in table_data_3b4b.items():
+        print("\t{" f"0x{cw.get(-1):02x}, 0x{cw.get(1):02x}" "},")
+    print("};\n")
+
+    print("const uint8_t table_control_3b4b[][2] = {")
+    for _, cw in table_control_3b4b.items():
+        print("\t{" f"0x{cw.get(-1):02x}, 0x{cw.get(1):02x}" "},")
+    print("};\n")
+
+
+# write_tables()
+write_c_arrays()
