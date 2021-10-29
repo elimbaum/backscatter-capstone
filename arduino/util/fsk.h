@@ -20,7 +20,7 @@ double freq_from_count(long count);
 //inline void send_bit(char b);
 
 void setup_io();
-void setup_timers(long, long);
+void setup_timers(long);
 
 void send_bit(char);
 

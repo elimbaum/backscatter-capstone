@@ -1,4 +1,4 @@
-const uint8_t table_5b6b[][2] PROGMEM = {
+const uint8_t table_5b6b[][2] = {
   {0x27, 0x18},
   {0x1d, 0x22},
   {0x2d, 0x12},
@@ -33,7 +33,7 @@ const uint8_t table_5b6b[][2] PROGMEM = {
   {0x2b, 0x14},
 };
 
-const uint8_t table_data_3b4b[][2] PROGMEM = {
+const uint8_t table_data_3b4b[][2] = {
   {0x0b, 0x04},
   {0x09, 0x09},
   {0x05, 0x05},
@@ -45,7 +45,7 @@ const uint8_t table_data_3b4b[][2] PROGMEM = {
   {0x07, 0x08},
 };
 
-const uint8_t table_control_3b4b[][2] PROGMEM = {
+const uint8_t table_control_3b4b[][2] = {
   {0x0b, 0x04},
   {0x06, 0x09},
   {0x0a, 0x05},

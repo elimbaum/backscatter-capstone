@@ -38,6 +38,8 @@ bool enqueue(uint8_t item) {
   }
   queue[++queue_tail] = item;
   _queue_count++;
+
+  return true;
 }
 
 int dequeue() {

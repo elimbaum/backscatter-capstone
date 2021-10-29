@@ -8,7 +8,7 @@ long count_one, count_zero;
 #include "fsk.h"
 #include "Arduino.h"
 
-static char serial_buffer[256];
+static char serial_buffer[128];
 
 void setup_io() {
   pinMode(CTRL_1_PIN, OUTPUT);
@@ -38,29 +38,42 @@ double freq_from_count(long count) {
   return (double)F_CPU / BASEBAND_PRESCALE / 2 / (1 + count);
 }
 
-// req_center: requested FSK center frequency, HZ
-// req_dev: requested FSK deviation (one-sided), HZ
-//
-// this function will generate FSK frequencies as close as possible to
-// requested, and then adjust center frequency as requred.
-void setup_timers(long req_center, long req_dev) {
-  long high_count = count_from_freq(req_center + req_dev);
-  long low_count = count_from_freq(req_center - req_dev);
+/* setup_timers
+ *
+ * configure Timer1 for FSK transmission. Will find the closest two FSK
+ * frequencies near the requested center frequency.
+ * 
+ * Note: previous version allowed a requested FSK deviation. Now it will just
+ * provide the smallest possible deviation.
+ */
+void setup_timers(long req_center_f) {
+  long requested_count = count_from_freq(req_center_f);
+  long possible_center_f = freq_from_count(requested_count);
 
-  if (high_count == low_count) {
-    Serial.println("ERROR! Not enough timer precision. Increase deviation frequency or prescaler.");
-    for (;;) { }
+  unsigned int low_count = 0, high_count = 0;
+
+  // note: +/- backwards because period/freq inverse.
+  if (possible_center_f > req_center_f) {
+    high_count = requested_count;
+    low_count = requested_count + 1;
+  } else if (possible_center_f < req_center_f) {
+    low_count = requested_count;
+    high_count = requested_count - 1;
+  } else {
+    // on the off chance is exactly right...
+    low_count = requested_count + 1;
+    high_count = requested_count - 1;
   }
 
-  // now that we have counts, figure out what the frequencies actually come out to
+  // now that we have counts, figure out what the frequencies actually are
   double actual_low_f  = freq_from_count(low_count);
   double actual_high_f = freq_from_count(high_count);
 
   double actual_center_f = (actual_low_f + actual_high_f) / 2;
 
   // report back to user
-  sprintf(serial_buffer, "Requested %ld +/- %ld Hz", req_center, req_dev);
-  Serial.println(serial_buffer);
+  // sprintf(serial_buffer, "Requested center %ld Hz", req_center_f);
+  // Serial.println(serial_buffer);
 
   Serial.print("Got "); Serial.print(actual_center_f);
   sprintf(serial_buffer, " (+%d, -%d) Hz",
@@ -68,7 +81,7 @@ void setup_timers(long req_center, long req_dev) {
             (int)(actual_center_f - actual_low_f));
   Serial.println(serial_buffer);
 
-  sprintf(serial_buffer, "Counts %ld %ld", low_count, high_count);
+  sprintf(serial_buffer, "Counts %d,%d", high_count, low_count);
   Serial.println(serial_buffer);
 
   count_one = high_count;

@@ -5,7 +5,7 @@
 
 from enum import Enum, auto
 from collections import namedtuple
-from typing import NamedTuple
+from typing import NamedTuple, Tuple
 from random import randint
 import sys
 
@@ -91,6 +91,10 @@ def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
 
     return res
 
+def decode_8b10b(val: int, rd: int = None) -> Tuple[CodewordType, int]:
+    # do we need to have a separate running disparity here?
+    pass
+
 with open(CODEWORD_FILE) as f:
     header = f.readline().split()
     assert header == ['DATA', 'CODE', 'OTHER_CODE']
@@ -143,8 +147,6 @@ for v in range(0xFF + 1):
     enc = encode_8b10b(CodewordType.CONTROL, v)
     # print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
     print(f"{v:3} -> {enc:3} ~ {enc:b}")
-
-sys.exit()
 
 RUNNING_DISPARITY = -1
 
