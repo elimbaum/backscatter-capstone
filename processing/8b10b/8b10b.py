@@ -4,10 +4,11 @@
 # reads codewords from file
 
 from enum import Enum, auto
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from typing import NamedTuple, Tuple
-from random import randint
+import random
 import sys
+from pprint import pprint
 
 CODEWORD_FILE = '8b10b.tsv'
 
@@ -30,11 +31,20 @@ codewords = {
     }
 }
 
+# negative, positive disparity
+decodewords = {
+    'x': [defaultdict(list), defaultdict(list)],
+    'y': [defaultdict(list), defaultdict(list)]
+}
+
 # 12 control codes, including commas: K.28.1, K.28.5, K.28.7
 CONTROL_CODES = (0x1C, 0x3C, 0x5C, 0x7C, 0x9C, 0xBC,
                  0xDC, 0xFC, 0xF7, 0xFB, 0xFD, 0xFE)
 
-RUNNING_DISPARITY = -1
+COMMAS = (0x3C, 0xBC, 0xFC)
+
+ENC_RUNNING_DISPARITY = -1
+DEC_RUNNING_DISPARITY = -1
 
 def _8b10b_HGF(v: int) -> int:
     return (v >> 5) & 0x7
@@ -53,10 +63,10 @@ def rd_to_index(rd: int) -> int:
         return 1
 
 def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
-    global RUNNING_DISPARITY
+    global ENC_RUNNING_DISPARITY
 
     if rd is None:
-        rd = RUNNING_DISPARITY
+        rd = ENC_RUNNING_DISPARITY
 
     # compute special case for D.x.*7
     # we store this at index 8
@@ -79,21 +89,17 @@ def encode_8b10b(cw_type: CodewordType, val: int, rd: int = None):
     if cw_type == CodewordType.CONTROL and x not in hi_mapping['x']:
         hi_mapping = codewords[CodewordType.DATA]
         
-    hi = hi_mapping['x'][x][rd_to_index(RUNNING_DISPARITY)]
+    hi = hi_mapping['x'][x][rd_to_index(ENC_RUNNING_DISPARITY)]
     pc = popcount(hi)
-    RUNNING_DISPARITY += pc - (HI_SIZE - pc)
+    ENC_RUNNING_DISPARITY += pc - (HI_SIZE - pc)
     
-    lo = lo_mapping['y'][y][rd_to_index(RUNNING_DISPARITY)]
+    lo = lo_mapping['y'][y][rd_to_index(ENC_RUNNING_DISPARITY)]
     pc = popcount(lo)
-    RUNNING_DISPARITY += pc - (LO_SIZE - pc)
+    ENC_RUNNING_DISPARITY += pc - (LO_SIZE - pc)
 
     res = hi << 4 | lo
 
     return res
-
-def decode_8b10b(val: int, rd: int = None) -> Tuple[CodewordType, int]:
-    # do we need to have a separate running disparity here?
-    pass
 
 with open(CODEWORD_FILE) as f:
     header = f.readline().split()
@@ -134,51 +140,136 @@ with open(CODEWORD_FILE) as f:
             v = int(cw_comp[1])
 
         codewords[cw_type][f][v] = (neg_cw, pos_cw)
+        decodewords[f][rd_to_index(-1)][neg_cw].append((v, cw_type))
+        decodewords[f][rd_to_index(+1)][pos_cw].append((v, cw_type))
     
-print("data")
-for v in range(0xFF + 1):
-    enc = encode_8b10b(CodewordType.DATA, v)
-    # print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
-    print(f"{v:3} -> {enc:3} ~ {enc:b}")
+# print("data")
+# for v in range(0xFF + 1):
+#     enc = encode_8b10b(CodewordType.DATA, v)
+#     # print(f"{v:3} D.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+#     print(f"{v:3} -> {enc:3} ~ {enc:b}")
 
-print("control")
-# for v in CONTROL_CODES:
-for v in range(0xFF + 1):
-    enc = encode_8b10b(CodewordType.CONTROL, v)
-    # print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
-    print(f"{v:3} -> {enc:3} ~ {enc:b}")
+# print("control")
+# # for v in CONTROL_CODES:
+# for v in range(0xFF + 1):
+#     enc = encode_8b10b(CodewordType.CONTROL, v)
+#     # print(f"{v:3} K.{_8b10b_EDCBA(v):02}.{_8b10b_HGF(v)} {enc:3} ~> {enc:010b}")
+#     print(f"{v:3} -> {enc:3} ~ {enc:b}")
 
-RUNNING_DISPARITY = -1
+ENC_RUNNING_DISPARITY = -1
 
-print("starting random test")
-stream = []
-n_check = 0
-last_check = 0
-while True:
-    v = randint(0, 0xFF)
-    enc = encode_8b10b(CodewordType.DATA, v)
-    stream.append(enc)
+def random_test():
+    print("starting random test")
+    stream = []
+    n_check = 0
+    last_check = 0
+    while True:
+        v = randint(0, 0xFF)
+        enc = encode_8b10b(CodewordType.DATA, v)
+        stream.append(enc)
 
-    bin_stream = ''.join(f"{e:010b}" for e in stream)
-    # print(bin_stream)
+        bin_stream = ''.join(f"{e:010b}" for e in stream)
+        # print(bin_stream)
 
+        try:
+            assert "0" * 6 not in bin_stream
+            assert "1" * 6 not in bin_stream
+            assert "00111110" not in bin_stream
+            assert "11000001" not in bin_stream
+        except AssertionError:
+            print(bin_stream)
+            print(n_check, "were ok")
+            break
+
+        n_check += 1
+
+        if len(stream) > 4:
+            stream.pop(0)
+
+        if n_check >= last_check * 8:
+            print(n_check, "checked, ok")
+            last_check = n_check
+
+SEED = 13
+
+def random_encoder():
+    COMMA_EVERY = 32
+    c = 0
+    enc_rng = random.Random(SEED)
+    while True:
+        v = enc_rng.randint(0, 0xFF)
+        yield encode_8b10b(CodewordType.DATA, v)
+        c += 1
+
+        # if c >= COMMA_EVERY:
+        #     yield encode_8b10b(CodewordType.CONTROL, COMMAS[0])
+        #     c = 0
+
+def decode_8b10b_symbol(val: int, rd: int = None) -> Tuple[CodewordType, int]:
+    global DEC_RUNNING_DISPARITY
+
+    hi = val >> 4  # 6 bits abcdei
+    dx_opt = decodewords['x'][rd_to_index(DEC_RUNNING_DISPARITY)][hi]
+    pc = popcount(hi)
+    DEC_RUNNING_DISPARITY += pc - (HI_SIZE - pc)
+
+    lo = val & 0xf # 4 bits fghj 
+    dy_opt = decodewords['y'][rd_to_index(DEC_RUNNING_DISPARITY)][lo]
+    pc = popcount(lo)
+    DEC_RUNNING_DISPARITY += pc - (LO_SIZE - pc)
+
+    # print(f"{hi:06b}, {lo:04b}")
+
+    # decode
+    # we take the type of whichever we're forced to (only 1 match)
+    if len(dx_opt) == 1:
+        dx = dx_opt[0]
+        t = dx[1]
+
+        if dy_opt[0][1] == t:
+            dy = dy_opt[0]
+        else:
+            dy = dy_opt[1]
+
+    elif len(dy_opt) == 1:
+        dy = dy_opt[0]
+        t = dy[1]
+
+        if dx_opt[0][1] == t:
+            dx = dx_opt[0]
+        else:
+            dx = dx_opt[1]
+    else:
+        raise "uh oh"
+
+    if dy == (8, CodewordType.DATA):
+        # D.x.A7 case... make it 7
+        dy = (7, CodewordType.DATA)
+
+    return (dy[0] << 5) | dx[0], t
+
+def decode_8b10b_stream(stream):
+    dec_rng = random.Random(SEED)
+    n = 0
     try:
-        assert "0" * 6 not in bin_stream
-        assert "1" * 6 not in bin_stream
-        assert "00111110" not in bin_stream
-        assert "11000001" not in bin_stream
-    except AssertionError:
-        print(bin_stream)
-        print(n_check, "were ok")
-        break
+        for b in stream():
+            v, t = decode_8b10b_symbol(b)
+            n += 1
 
-    n_check += 1
+            exp = dec_rng.randint(0, 0xFF)
 
-    if len(stream) > 4:
-        stream.pop(0)
+            try:
+                assert v == exp
+            except AssertionError:
+                print(f"{n} correct. got {v}, exp {exp}")
+                break
 
-    if n_check >= last_check * 8:
-        print(n_check, "checked, ok")
-        last_check = n_check
+    except KeyboardInterrupt:
+        print(f"\n== {n} correct")
 
-    
+
+def decode_test():
+    print("decode test")
+    decode_8b10b_stream(random_encoder)
+
+decode_test()
