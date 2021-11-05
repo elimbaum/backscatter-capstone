@@ -14,7 +14,7 @@ static char serial_buffer[256];
 /* Frequency requests.
  * Timer set up will try to honor these as much as possible, given discrete-timing constraints.
  */
-const long REQ_CENTER_FREQ = 200000;
+const long REQ_CENTER_FREQ = 202000;
 const long REQ_DEV_FREQ    =   5000;
 
 unsigned long start_t;
@@ -45,7 +45,7 @@ void setup() {
   pinMode(13, OUTPUT);
 
   setup_io();
-  setup_timers(REQ_CENTER_FREQ, REQ_DEV_FREQ);
+  setup_timers(REQ_CENTER_FREQ);
 
   randomSeed(0);
   Serial.flush();
@@ -119,8 +119,8 @@ ISR(TIMER2_COMPA_vect) {
     bit_index = 0;
 
     // generate hamming-encoded byte
-    char hi = ud >> 4;
-    char lo = ud & 0xf;
+    int hi = ud >> 4;
+    int lo = ud & 0xf;
 
     hamming_data = hamming_encode_lut[hi] << HAMMING_SIZE | hamming_encode_lut[lo];
 
@@ -129,6 +129,8 @@ ISR(TIMER2_COMPA_vect) {
     bit_index = HAMMING_SIZE * 2 - 1;
   }
 //  Serial.println(!!(hamming_data & _BV(bit_index)));
-  send_bit(!!(hamming_data & _BV(bit_index)));
+  char b = !!(hamming_data & _BV(bit_index));
+  send_bit(b);
+  digitalWrite(13, b);
   bit_index--;
 }

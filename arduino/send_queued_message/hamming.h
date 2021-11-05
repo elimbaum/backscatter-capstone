@@ -6,14 +6,16 @@
 #define PARITY2(X) (BIT(X, 3) ^             BIT(X, 1) ^ BIT(X, 0))
 #define PARITY3(X) (            BIT(X, 2) ^ BIT(X, 1) ^ BIT(X, 0))
 
-//#define HAMMING_CODEWORD(X) (\
-//      (BIT(X, 3)  << 6) | \
-//      (BIT(X, 2)  << 5) | \
-//      (BIT(X, 1)  << 4) | \
-//      (PARITY3(X) << 3) | \
-//      (BIT(X, 0)  << 2) | \
-//      (PARITY2(X) << 1) | \
-//      (PARITY1(X) << 0))
+/*
+#define HAMMING_CODEWORD(X) (\
+      (BIT(X, 3)  << 6) | \
+      (BIT(X, 2)  << 5) | \
+      (BIT(X, 1)  << 4) | \
+      (PARITY3(X) << 3) | \
+      (BIT(X, 0)  << 2) | \
+      (PARITY2(X) << 1) | \
+      (PARITY1(X) << 0))
+*/
 
 #define HAMMING_CODEWORD(X) (\
       (PARITY1(X) << 6) | \

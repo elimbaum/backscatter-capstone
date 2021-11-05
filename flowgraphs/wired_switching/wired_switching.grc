@@ -80,7 +80,7 @@ blocks:
     gui_hint: 1,3,1,1
     label: ''
     type: real
-    value: 5.00e3
+    value: '2564'
   states:
     bus_sink: false
     bus_source: false
@@ -139,8 +139,8 @@ blocks:
     rangeType: float
     start: '0'
     step: '1'
-    stop: '100'
-    value: '80'
+    stop: '76'
+    value: '76'
     widget: counter_slider
   states:
     bus_sink: false
@@ -180,7 +180,7 @@ blocks:
     gui_hint: 1,2,1,1
     label: Scatter Freq (kHz)
     type: real
-    value: '200.125'
+    value: '202.56409'
   states:
     bus_sink: false
     bus_source: false
@@ -188,33 +188,6 @@ blocks:
     coordinate: [576, 12.0]
     rotation: 0
     state: enabled
-- name: signal_freq
-  id: variable
-  parameters:
-    comment: ''
-    value: signal_freq_khz * 1e3
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [416, 92.0]
-    rotation: 0
-    state: enabled
-- name: signal_freq_khz
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: 1,1,1,1
-    label: Signal Freq (kHz)
-    type: int
-    value: '100'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [416, 12.0]
-    rotation: 0
-    state: true
 - name: sps
   id: variable
   parameters:
@@ -239,6 +212,33 @@ blocks:
     coordinate: [160, 148.0]
     rotation: 0
     state: enabled
+- name: tone_freq
+  id: variable
+  parameters:
+    comment: ''
+    value: tone_freq_khz * 1e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 92.0]
+    rotation: 0
+    state: enabled
+- name: tone_freq_khz
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 1,1,1,1
+    label: Tone Freq (kHz)
+    type: real
+    value: '100'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 12.0]
+    rotation: 0
+    state: true
 - name: tx_gain
   id: variable_qtgui_range
   parameters:
@@ -250,7 +250,7 @@ blocks:
     rangeType: float
     start: '0'
     step: '1'
-    stop: '50'
+    stop: '89'
     value: '0'
     widget: counter_slider
   states:
@@ -295,7 +295,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: signal_freq
+    freq: tone_freq
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -317,7 +317,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: -(signal_freq + scatter_center_freq)
+    freq: -(tone_freq + scatter_center_freq)
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -375,6 +375,24 @@ blocks:
     coordinate: [1536, 620.0]
     rotation: 0
     state: disabled
+- name: blocks_add_const_vxx_1
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '-1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1664, 348.0]
+    rotation: 180
+    state: true
 - name: blocks_copy_0
   id: blocks_copy
   parameters:
@@ -488,6 +506,24 @@ blocks:
     coordinate: [1320, 620.0]
     rotation: 0
     state: disabled
+- name: blocks_multiply_const_vxx_3
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '2'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 428.0]
+    rotation: 0
+    state: true
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
   parameters:
@@ -640,7 +676,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1288, 440.0]
+    coordinate: [1272, 440.0]
     rotation: 0
     state: enabled
 - name: digital_pfb_clock_sync_xxx_0
@@ -2028,6 +2064,7 @@ connections:
 - [band_pass_filter_0, '0', blocks_copy_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_file_sink_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_udp_sink_0, '0']
+- [blocks_add_const_vxx_1, '0', qtgui_time_sink_x_1, '2']
 - [blocks_copy_0, '0', analog_quadrature_demod_cf_0, '0']
 - [blocks_copy_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_copy_0, '0', qtgui_waterfall_sink_x_0, '0']
@@ -2035,6 +2072,7 @@ connections:
 - [blocks_multiply_const_vxx_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_1, '1']
 - [blocks_multiply_const_vxx_2, '0', qtgui_time_sink_x_1, '1']
+- [blocks_multiply_const_vxx_3, '0', blocks_add_const_vxx_1, '0']
 - [blocks_multiply_xx_0, '0', band_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_freq_sink_x_1, '0']
@@ -2042,7 +2080,7 @@ connections:
 - [blocks_repeat_0, '0', blocks_multiply_const_vxx_2, '0']
 - [blocks_throttle_1, '0', blocks_copy_0, '0']
 - [blocks_uchar_to_float_0, '0', qtgui_time_sink_x_1_0, '0']
-- [blocks_uchar_to_float_1, '0', qtgui_time_sink_x_1, '2']
+- [blocks_uchar_to_float_1, '0', blocks_multiply_const_vxx_3, '0']
 - [digital_binary_slicer_fb_0, '0', blocks_add_const_vxx_0, '0']
 - [digital_binary_slicer_fb_0, '0', blocks_uchar_to_float_0, '0']
 - [digital_binary_slicer_fb_1, '0', blocks_uchar_to_float_1, '0']

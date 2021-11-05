@@ -279,8 +279,6 @@ class top_block(gr.top_block, Qt.QWidget):
         for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, '/Users/ebaum/Documents/capstone/repo/processing/hamming-test/hamming-preamb-inc-lp-s15k.iq', False)
-        self.blocks_file_sink_0.set_unbuffered(False)
         self.analog_sig_source_x_1 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, -(carrier_freq + scatter_center_freq), 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(tx_samp_rate, analog.GR_COS_WAVE, carrier_freq, 1, 0, 0)
         self.analog_pwr_squelch_xx_0 = analog.pwr_squelch_cc(-squelch_lvl_neg, 1e-4, 0, True)
@@ -297,7 +295,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_freq_sink_x_1, 0))
         self.connect((self.low_pass_filter_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
-        self.connect((self.low_pass_filter_0_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.low_pass_filter_0_0, 0), (self.qtgui_freq_sink_x_0, 1))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_multiply_xx_0, 0))
 
