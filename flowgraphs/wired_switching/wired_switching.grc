@@ -80,7 +80,7 @@ blocks:
     gui_hint: 1,3,1,1
     label: ''
     type: real
-    value: '2564'
+    value: '2322'
   states:
     bus_sink: false
     bus_source: false
@@ -92,7 +92,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: fsk_deviation_hz / 5
+    value: fsk_deviation_hz / 3
   states:
     bus_sink: false
     bus_source: false
@@ -172,15 +172,15 @@ blocks:
     bus_structure: null
     coordinate: [576, 92.0]
     rotation: 0
-    state: enabled
-- name: scatter_freq_khz
+    state: disabled
+- name: scatter_center_freq
   id: variable_qtgui_entry
   parameters:
     comment: ''
     gui_hint: 1,2,1,1
     label: Scatter Freq (kHz)
     type: real
-    value: '202.56409'
+    value: '192799.06'
   states:
     bus_sink: false
     bus_source: false
@@ -251,7 +251,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '89'
-    value: '0'
+    value: '40'
     widget: counter_slider
   states:
     bus_sink: false
@@ -332,7 +332,7 @@ blocks:
     coordinate: [296, 436.0]
     rotation: 0
     state: enabled
-- name: band_pass_filter_0
+- name: band_pass_filter_1
   id: band_pass_filter
   parameters:
     affinity: ''
@@ -341,22 +341,22 @@ blocks:
     comment: ''
     decim: int(samp_rate/filter_samp_rate)
     gain: '1'
-    high_cutoff_freq: fsk_deviation_hz + fsk_width_hz
+    high_cutoff_freq: fsk_deviation_hz + fsk_width_hz/2
     interp: '1'
-    low_cutoff_freq: fsk_deviation_hz - fsk_width_hz
+    low_cutoff_freq: fsk_deviation_hz - fsk_width_hz/2
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
     type: fir_filter_ccf
-    width: fsk_width_hz / 2
+    width: fsk_width_hz
     win: firdes.WIN_HAMMING
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [704, 604.0]
+    coordinate: [688, 604.0]
     rotation: 0
-    state: disabled
+    state: true
 - name: blocks_add_const_vxx_0
   id: blocks_add_const_vxx
   parameters:
@@ -732,7 +732,7 @@ blocks:
     alias: ''
     beta: '6.76'
     comment: ''
-    cutoff_freq: fsk_deviation_hz * 2
+    cutoff_freq: fsk_deviation_hz * 1.25
     decim: int(samp_rate/filter_samp_rate)
     gain: '1'
     interp: '1'
@@ -748,7 +748,7 @@ blocks:
     bus_structure: null
     coordinate: [696, 452.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -780,7 +780,7 @@ blocks:
     color9: '"dark green"'
     comment: filtered
     ctrlpanel: 'True'
-    fc: '0'
+    fc: scatter_center_freq
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
@@ -826,7 +826,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1200, 116.0]
+    coordinate: [1184, 108.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_1
@@ -2061,7 +2061,7 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', qtgui_waterfall_sink_x_1, '0']
 - [analog_sig_source_x_0, '0', uhd_usrp_sink_0, '0']
 - [analog_sig_source_x_1, '0', blocks_multiply_xx_0, '1']
-- [band_pass_filter_0, '0', blocks_copy_0, '0']
+- [band_pass_filter_1, '0', blocks_copy_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_file_sink_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_udp_sink_0, '0']
 - [blocks_add_const_vxx_1, '0', qtgui_time_sink_x_1, '2']
@@ -2073,7 +2073,7 @@ connections:
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_1, '1']
 - [blocks_multiply_const_vxx_2, '0', qtgui_time_sink_x_1, '1']
 - [blocks_multiply_const_vxx_3, '0', blocks_add_const_vxx_1, '0']
-- [blocks_multiply_xx_0, '0', band_pass_filter_0, '0']
+- [blocks_multiply_xx_0, '0', band_pass_filter_1, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_freq_sink_x_1, '0']
 - [blocks_null_source_0, '0', qtgui_time_sink_x_1, '1']

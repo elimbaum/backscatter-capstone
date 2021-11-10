@@ -31,8 +31,8 @@ double freq_from_count(long count) {
   return (double)F_CPU / PRESCALE / 2 / (1 + count);
 }
 
-const long REQ_CENTER_FREQ = 200000;
-const long REQ_DEV_FREQ    =   5000;
+const long REQ_CENTER_FREQ = 202000;
+const long REQ_DEV_FREQ    =   2500;
 
 long count_a, count_b;
 
@@ -45,6 +45,8 @@ void setup() {
 
   digitalWrite(CTRL_1_PIN, LOW);
   digitalWrite(CTRL_2_PIN, LOW);
+
+  pinMode(13, OUTPUT);
 
   Serial.begin(115200);
   Serial.println("\n\n\n");
@@ -126,12 +128,10 @@ inline void send_one() {
 }
 
 void loop() {
-  send_one();   // 10
-  send_zero();  // 01
-  send_one();   // 10
-  send_one();   // 10
-  send_zero();  // 01
-  send_zero();  // 01
-  send_zero();  // 01
-  send_one();   // 10
+  set_count(count_b);
+  digitalWrite(13, HIGH);
+  delay(1000);
+  set_count(count_a);
+  digitalWrite(13, LOW);
+  delay(1000);
 }
