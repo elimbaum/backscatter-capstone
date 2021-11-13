@@ -80,7 +80,7 @@ blocks:
     gui_hint: 1,3,1,1
     label: ''
     type: real
-    value: '2322'
+    value: '2700'
   states:
     bus_sink: false
     bus_source: false
@@ -92,14 +92,29 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: fsk_deviation_hz / 3
+    value: '300'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [80, 636.0]
     rotation: 0
-    state: enabled
+    state: disabled
+- name: fsk_width_hz
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 2,3,1,1
+    label: fsk width (hz)
+    type: int
+    value: '300'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 588.0]
+    rotation: 0
+    state: true
 - name: nfilts
   id: variable
   parameters:
@@ -127,7 +142,7 @@ blocks:
     bus_structure: null
     coordinate: [768, 820.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: rx_gain
   id: variable_qtgui_range
   parameters:
@@ -140,7 +155,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '76'
-    value: '76'
+    value: '38'
     widget: counter_slider
   states:
     bus_sink: false
@@ -178,9 +193,9 @@ blocks:
   parameters:
     comment: ''
     gui_hint: 1,2,1,1
-    label: Scatter Freq (kHz)
+    label: Scatter Freq (Hz)
     type: real
-    value: '192799.06'
+    value: '207827.25'
   states:
     bus_sink: false
     bus_source: false
@@ -390,7 +405,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1664, 348.0]
+    coordinate: [1624, 364.0]
     rotation: 180
     state: true
 - name: blocks_copy_0
@@ -521,7 +536,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1600, 428.0]
+    coordinate: [1600, 460.0]
     rotation: 0
     state: true
 - name: blocks_multiply_xx_0
@@ -732,15 +747,15 @@ blocks:
     alias: ''
     beta: '6.76'
     comment: ''
-    cutoff_freq: fsk_deviation_hz * 1.25
+    cutoff_freq: fsk_deviation_hz * 1.5
     decim: int(samp_rate/filter_samp_rate)
-    gain: '1'
+    gain: '0.1'
     interp: '1'
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
     type: fir_filter_ccf
-    width: fsk_width_hz
+    width: fsk_deviation_hz * 0.5
     win: firdes.WIN_HAMMING
   states:
     bus_sink: false
@@ -748,7 +763,7 @@ blocks:
     bus_structure: null
     coordinate: [696, 452.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -799,8 +814,8 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
-    nconnections: '1'
+    name: tuned & filtered
+    nconnections: '2'
     showports: 'False'
     tr_chan: '0'
     tr_level: '0.0'
@@ -864,7 +879,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 4,1,2,2
+    gui_hint: ''
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -879,7 +894,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
+    name: Tuned
     nconnections: '1'
     showports: 'False'
     tr_chan: '0'
@@ -906,7 +921,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 252.0]
+    coordinate: [888, 252.0]
     rotation: 0
     state: disabled
 - name: qtgui_freq_sink_x_2
@@ -1157,7 +1172,7 @@ blocks:
     tr_chan: '0'
     tr_delay: '0'
     tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_AUTO
+    tr_mode: qtgui.TRIG_MODE_NORM
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '""'
     type: float
@@ -2088,7 +2103,7 @@ connections:
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', blocks_repeat_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', digital_binary_slicer_fb_0, '0']
-- [low_pass_filter_0, '0', blocks_copy_0, '0']
+- [low_pass_filter_0, '0', qtgui_freq_sink_x_0, '1']
 - [uhd_usrp_source_0, '0', blocks_multiply_const_vxx_0, '0']
 - [uhd_usrp_source_0, '0', qtgui_time_sink_x_0, '0']
 

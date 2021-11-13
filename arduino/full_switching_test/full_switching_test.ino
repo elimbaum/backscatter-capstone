@@ -42,9 +42,11 @@ void loop() {
         if (cmd == "slow") {
             Serial.println("starting 1 bit/sec");
             switching_interval = 1000;
+            digitalWrite(LED, HIGH);
         } else if (cmd == "fast") {
             Serial.println("starting 1000 bit/sec");
             switching_interval = 1;
+            digitalWrite(LED, HIGH);
         } else if (cmd == "center") {
             Serial.print("new center freq? > ");
             while (! Serial.available()) { }

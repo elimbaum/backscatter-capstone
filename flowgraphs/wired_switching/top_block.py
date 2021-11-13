@@ -78,20 +78,19 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.tone_freq_khz = tone_freq_khz = 100
         self.symbol_rate = symbol_rate = 1e3
         self.filter_samp_rate = filter_samp_rate = 15e3
-        self.tone_freq_khz = tone_freq_khz = 100
-        self.sps = sps = int(filter_samp_rate/symbol_rate)
-        self.fsk_deviation_hz = fsk_deviation_hz = 2322
         self.tx_samp_rate = tx_samp_rate = 1e6
         self.tx_gain = tx_gain = 40
         self.tone_freq = tone_freq = tone_freq_khz * 1e3
-        self.scatter_center_freq = scatter_center_freq = 192799.06
+        self.sps = sps = int(filter_samp_rate/symbol_rate)
+        self.scatter_center_freq = scatter_center_freq = 207827.25
         self.samp_rate = samp_rate = 1e6
-        self.rx_gain = rx_gain = 76
-        self.rrc_taps = rrc_taps = firdes.root_raised_cosine(1.0, filter_samp_rate,symbol_rate, 0.35, 11*sps)
+        self.rx_gain = rx_gain = 38
         self.nfilts = nfilts = 32
-        self.fsk_width_hz = fsk_width_hz = fsk_deviation_hz / 3
+        self.fsk_width_hz = fsk_width_hz = 300
+        self.fsk_deviation_hz = fsk_deviation_hz = 2700
         self.enable_rx = enable_rx = 1
         self.center_freq = center_freq = 915e6
 
@@ -106,7 +105,7 @@ class top_block(gr.top_block, Qt.QWidget):
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
         self._scatter_center_freq_tool_bar = Qt.QToolBar(self)
-        self._scatter_center_freq_tool_bar.addWidget(Qt.QLabel('Scatter Freq (kHz)' + ": "))
+        self._scatter_center_freq_tool_bar.addWidget(Qt.QLabel('Scatter Freq (Hz)' + ": "))
         self._scatter_center_freq_line_edit = Qt.QLineEdit(str(self.scatter_center_freq))
         self._scatter_center_freq_tool_bar.addWidget(self._scatter_center_freq_line_edit)
         self._scatter_center_freq_line_edit.returnPressed.connect(
@@ -116,12 +115,23 @@ class top_block(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(2, 3):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._rx_gain_range = Range(0, 76, 1, 76, 200)
+        self._rx_gain_range = Range(0, 76, 1, 38, 200)
         self._rx_gain_win = RangeWidget(self._rx_gain_range, self.set_rx_gain, 'RX gain (dB)', "counter_slider", float)
         self.top_grid_layout.addWidget(self._rx_gain_win, 2, 2, 1, 1)
         for r in range(2, 3):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(2, 3):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._fsk_width_hz_tool_bar = Qt.QToolBar(self)
+        self._fsk_width_hz_tool_bar.addWidget(Qt.QLabel('fsk width (hz)' + ": "))
+        self._fsk_width_hz_line_edit = Qt.QLineEdit(str(self.fsk_width_hz))
+        self._fsk_width_hz_tool_bar.addWidget(self._fsk_width_hz_line_edit)
+        self._fsk_width_hz_line_edit.returnPressed.connect(
+            lambda: self.set_fsk_width_hz(int(str(self._fsk_width_hz_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._fsk_width_hz_tool_bar, 2, 3, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
         self._fsk_deviation_hz_tool_bar = Qt.QToolBar(self)
         self._fsk_deviation_hz_tool_bar.addWidget(Qt.QLabel('fsk_deviation_hz' + ": "))
@@ -195,7 +205,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_1.enable_tags(False)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_AUTO, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
         self.qtgui_time_sink_x_1.enable_autoscale(False)
         self.qtgui_time_sink_x_1.enable_grid(False)
         self.qtgui_time_sink_x_1.enable_axis_labels(True)
@@ -239,8 +249,8 @@ class top_block(gr.top_block, Qt.QWidget):
             firdes.WIN_BLACKMAN_hARRIS, #wintype
             scatter_center_freq, #fc
             filter_samp_rate, #bw
-            "", #name
-            1
+            'tuned & filtered', #name
+            2
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
         self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
@@ -263,7 +273,7 @@ class top_block(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -278,6 +288,15 @@ class top_block(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 5):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.low_pass_filter_0 = filter.fir_filter_ccf(
+            int(samp_rate/filter_samp_rate),
+            firdes.low_pass(
+                0.1,
+                samp_rate,
+                fsk_deviation_hz * 1.5,
+                fsk_deviation_hz * 0.5,
+                firdes.WIN_HAMMING,
+                6.76))
         self.digital_binary_slicer_fb_1 = digital.binary_slicer_fb()
         self.blocks_uchar_to_float_1 = blocks.uchar_to_float()
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_float*1)
@@ -316,9 +335,11 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_3, 0), (self.blocks_add_const_vxx_1, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.band_pass_filter_1, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
         self.connect((self.blocks_null_source_0, 0), (self.qtgui_time_sink_x_1, 1))
         self.connect((self.blocks_uchar_to_float_1, 0), (self.blocks_multiply_const_vxx_3, 0))
         self.connect((self.digital_binary_slicer_fb_1, 0), (self.blocks_uchar_to_float_1, 0))
+        self.connect((self.low_pass_filter_0, 0), (self.qtgui_freq_sink_x_0, 1))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_multiply_const_vxx_0, 0))
 
 
@@ -326,24 +347,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.settings = Qt.QSettings("GNU Radio", "top_block")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
-
-    def get_symbol_rate(self):
-        return self.symbol_rate
-
-    def set_symbol_rate(self, symbol_rate):
-        self.symbol_rate = symbol_rate
-        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
-        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
-
-    def get_filter_samp_rate(self):
-        return self.filter_samp_rate
-
-    def set_filter_samp_rate(self, filter_samp_rate):
-        self.filter_samp_rate = filter_samp_rate
-        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
-        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.scatter_center_freq, self.filter_samp_rate)
-        self.qtgui_time_sink_x_1.set_samp_rate(self.filter_samp_rate)
 
     def get_tone_freq_khz(self):
         return self.tone_freq_khz
@@ -353,21 +356,21 @@ class top_block(gr.top_block, Qt.QWidget):
         self.set_tone_freq(self.tone_freq_khz * 1e3)
         Qt.QMetaObject.invokeMethod(self._tone_freq_khz_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.tone_freq_khz)))
 
-    def get_sps(self):
-        return self.sps
+    def get_symbol_rate(self):
+        return self.symbol_rate
 
-    def set_sps(self, sps):
-        self.sps = sps
-        self.set_rrc_taps(firdes.root_raised_cosine(1.0, self.filter_samp_rate, self.symbol_rate, 0.35, 11*self.sps))
+    def set_symbol_rate(self, symbol_rate):
+        self.symbol_rate = symbol_rate
+        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
 
-    def get_fsk_deviation_hz(self):
-        return self.fsk_deviation_hz
+    def get_filter_samp_rate(self):
+        return self.filter_samp_rate
 
-    def set_fsk_deviation_hz(self, fsk_deviation_hz):
-        self.fsk_deviation_hz = fsk_deviation_hz
-        Qt.QMetaObject.invokeMethod(self._fsk_deviation_hz_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.fsk_deviation_hz)))
-        self.set_fsk_width_hz(self.fsk_deviation_hz / 3)
-        self.band_pass_filter_1.set_taps(firdes.band_pass(1, self.samp_rate, self.fsk_deviation_hz - self.fsk_width_hz/2, self.fsk_deviation_hz + self.fsk_width_hz/2, self.fsk_width_hz, firdes.WIN_HAMMING, 6.76))
+    def set_filter_samp_rate(self, filter_samp_rate):
+        self.filter_samp_rate = filter_samp_rate
+        self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.scatter_center_freq, self.filter_samp_rate)
+        self.qtgui_time_sink_x_1.set_samp_rate(self.filter_samp_rate)
 
     def get_tx_samp_rate(self):
         return self.tx_samp_rate
@@ -392,6 +395,12 @@ class top_block(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0.set_frequency(self.tone_freq)
         self.analog_sig_source_x_1.set_frequency(-(self.tone_freq + self.scatter_center_freq))
 
+    def get_sps(self):
+        return self.sps
+
+    def set_sps(self, sps):
+        self.sps = sps
+
     def get_scatter_center_freq(self):
         return self.scatter_center_freq
 
@@ -408,6 +417,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_1.set_sampling_freq(self.samp_rate)
         self.band_pass_filter_1.set_taps(firdes.band_pass(1, self.samp_rate, self.fsk_deviation_hz - self.fsk_width_hz/2, self.fsk_deviation_hz + self.fsk_width_hz/2, self.fsk_width_hz, firdes.WIN_HAMMING, 6.76))
+        self.low_pass_filter_0.set_taps(firdes.low_pass(0.1, self.samp_rate, self.fsk_deviation_hz * 1.5, self.fsk_deviation_hz * 0.5, firdes.WIN_HAMMING, 6.76))
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
     def get_rx_gain(self):
@@ -416,12 +426,6 @@ class top_block(gr.top_block, Qt.QWidget):
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
         self.uhd_usrp_source_0.set_gain(self.rx_gain, 0)
-
-    def get_rrc_taps(self):
-        return self.rrc_taps
-
-    def set_rrc_taps(self, rrc_taps):
-        self.rrc_taps = rrc_taps
 
     def get_nfilts(self):
         return self.nfilts
@@ -434,7 +438,17 @@ class top_block(gr.top_block, Qt.QWidget):
 
     def set_fsk_width_hz(self, fsk_width_hz):
         self.fsk_width_hz = fsk_width_hz
+        Qt.QMetaObject.invokeMethod(self._fsk_width_hz_line_edit, "setText", Qt.Q_ARG("QString", str(self.fsk_width_hz)))
         self.band_pass_filter_1.set_taps(firdes.band_pass(1, self.samp_rate, self.fsk_deviation_hz - self.fsk_width_hz/2, self.fsk_deviation_hz + self.fsk_width_hz/2, self.fsk_width_hz, firdes.WIN_HAMMING, 6.76))
+
+    def get_fsk_deviation_hz(self):
+        return self.fsk_deviation_hz
+
+    def set_fsk_deviation_hz(self, fsk_deviation_hz):
+        self.fsk_deviation_hz = fsk_deviation_hz
+        Qt.QMetaObject.invokeMethod(self._fsk_deviation_hz_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.fsk_deviation_hz)))
+        self.band_pass_filter_1.set_taps(firdes.band_pass(1, self.samp_rate, self.fsk_deviation_hz - self.fsk_width_hz/2, self.fsk_deviation_hz + self.fsk_width_hz/2, self.fsk_width_hz, firdes.WIN_HAMMING, 6.76))
+        self.low_pass_filter_0.set_taps(firdes.low_pass(0.1, self.samp_rate, self.fsk_deviation_hz * 1.5, self.fsk_deviation_hz * 0.5, firdes.WIN_HAMMING, 6.76))
 
     def get_enable_rx(self):
         return self.enable_rx
