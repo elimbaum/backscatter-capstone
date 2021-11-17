@@ -109,6 +109,24 @@ void setup_timers(long req_center_f) {
 unsigned long b0 = 0;
 unsigned long b1 = 0;
 
+void configure_ask() {
+  set_count(count_one);
+}
+
+void configure_fsk() {
+  TCCR1A = _BV(COM1B0);
+}
+
+void send_ask_bit(char b) {
+  if (b) {
+    b1++;
+    TCCR1A = 0;
+  } else {
+    TCCR1A = _BV(COM1B0);
+    b0++;
+  }
+}
+
 void send_bit(char b) {
   if (b) {
     b1++;

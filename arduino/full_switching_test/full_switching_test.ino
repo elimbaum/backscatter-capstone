@@ -30,6 +30,7 @@ String cmd;
 volatile int switching_count = 0;
 int switching_interval = 1000;
 char curr_bit = 0;
+bool do_fsk = true;
 
 void loop() {
     if (Serial.available()) {
@@ -54,6 +55,14 @@ void loop() {
             Serial.println(cmd);
             unsigned long freq = cmd.toInt();
             setup_timers(freq);
+        } else if (cmd == "fsk") {
+            do_fsk = true;
+            configure_fsk();
+            Serial.println("doing 2-fsk");
+        } else if (cmd == "ask") {
+            do_fsk = false;
+            configure_ask();
+            Serial.println("doing ask on upper");
         } else {
             Serial.println("i don't know what that is!");
         }
@@ -64,10 +73,18 @@ void loop() {
     delay(1);
 }
 
+
+
 // 1ms timer
 ISR(TIMER2_COMPA_vect) {
     if (switching_count % switching_interval == 0) {
-        send_bit(curr_bit = !curr_bit);
+        if (do_fsk) {
+            send_bit(curr_bit);
+        } else {
+            send_ask_bit(curr_bit);
+        }
+        curr_bit = !curr_bit;
+        
         switching_count = 0;
     }
 

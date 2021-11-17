@@ -22,6 +22,10 @@ double freq_from_count(long count);
 void setup_io();
 void setup_timers(long);
 
+void configure_ask(void);
+void configure_fsk(void);
+
+void send_ask_bit(char);
 void send_bit(char);
 
 #endif
