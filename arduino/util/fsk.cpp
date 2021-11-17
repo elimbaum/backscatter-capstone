@@ -76,9 +76,11 @@ void setup_timers(long req_center_f) {
   // Serial.println(serial_buffer);
 
   Serial.print("Got "); Serial.print(actual_center_f);
-  sprintf(serial_buffer, " (+%d, -%d) Hz",
+  sprintf(serial_buffer, " (+%d, -%d) -> (%ld, %ld) Hz",
             (int)(actual_high_f - actual_center_f),
-            (int)(actual_center_f - actual_low_f));
+            (int)(actual_center_f - actual_low_f),
+            (long)actual_high_f,
+            (long)actual_low_f);
   Serial.println(serial_buffer);
 
   sprintf(serial_buffer, "Counts %d,%d", high_count, low_count);

@@ -10,6 +10,11 @@ static char serial_buffer[256];
 
 #define DEBOUNCE_MS 100
 
+typedef enum mode {
+    FLIP,
+    DATA,
+} Mode;
+
 void setup() {
     pinMode(LED, OUTPUT);
     setup_io();
@@ -31,6 +36,7 @@ volatile int switching_count = 0;
 int switching_interval = 1000;
 char curr_bit = 0;
 bool do_fsk = true;
+Mode m = FLIP;
 
 void loop() {
     if (Serial.available()) {
@@ -63,6 +69,10 @@ void loop() {
             do_fsk = false;
             configure_ask();
             Serial.println("doing ask on upper");
+        } else if (cmd == "flip") {
+            m = FLIP;
+        } else if (cmd == "data") {
+            m = DATA;
         } else {
             Serial.println("i don't know what that is!");
         }
@@ -74,19 +84,32 @@ void loop() {
 }
 
 
+char data = 0xd2;
+char bit_index = 0;
 
 // 1ms timer
 ISR(TIMER2_COMPA_vect) {
     if (switching_count % switching_interval == 0) {
+        char d = curr_bit;
+
+        if (m == DATA) {
+            d = !!(data & _BV(bit_index));
+        }
+
         if (do_fsk) {
-            send_bit(curr_bit);
+            send_bit(d);
         } else {
-            send_ask_bit(curr_bit);
+            send_ask_bit(d);
         }
         curr_bit = !curr_bit;
-        
         switching_count = 0;
+        
+        if (++bit_index > 7) {
+            bit_index = 0;
+        }
     }
+
+
 
     switching_count++;
 }
