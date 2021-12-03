@@ -108,9 +108,6 @@ void setup_timers(long req_center_f) {
   OCR2A = BIT_OCR;
 }
 
-unsigned long b0 = 0;
-unsigned long b1 = 0;
-
 void configure_ask() {
   set_count(count_one);
 }
@@ -121,20 +118,21 @@ void configure_fsk() {
 
 void send_ask_bit(char b) {
   if (b) {
-    b1++;
     TCCR1A = 0;
   } else {
     TCCR1A = _BV(COM1B0);
-    b0++;
   }
+}
+
+// for FM0 we don't actually care what the value is
+void toggle_ask() {
+  TCCR1A ^= _BV(COM1B0);
 }
 
 void send_bit(char b) {
   if (b) {
-    b1++;
     set_count(count_one);
   } else {
-    b0++;
     set_count(count_zero);
   }
 }
