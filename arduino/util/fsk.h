@@ -26,7 +26,7 @@ void configure_ask(void);
 void configure_fsk(void);
 
 void send_ask_bit(char);
-void toggle_ask(char);
+void toggle_ask(void);
 void send_bit(char);
 
 #endif

@@ -2,7 +2,8 @@
 
 #include "fsk.h"
 
-#define REQUESTED_CENTER_FREQ 190000 // HZ
+#define REQUESTED_CENTER_FREQ 161803 // HZ
+// #define REQUESTED_CENTER_FREQ 180000
 #define LED 13
 
 void setup() {
@@ -30,18 +31,21 @@ char get_bit() {
     return last_bit = ! last_bit;
 }
 
-volatile boolean start_of_bit = true;
+volatile boolean need_new_bit = true;
 volatile char bit;
 
 // 1 ms data timer
 ISR(TIMER2_COMPA_vect) {
-    if (start_of_bit) {
+    if (need_new_bit) {
         // get next bit
         bit = get_bit();
         toggle_ask();
-        start_of_bit = true;
-    } elif (bit == 0) {
-        toggle_ask();
-        start_of_bit = false;
+        need_new_bit = false;
+    } else {
+        if (bit == 0) {
+            toggle_ask();
+        }
+        // otherwise (bit == 1) do nothing
+        need_new_bit = true;
     }
 }
