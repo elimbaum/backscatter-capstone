@@ -88,7 +88,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate = 200e3
         self.rx_gain = rx_gain = 38
         self.pulse_width_hz = pulse_width_hz = 2000
-        self.freq_offset = freq_offset = 1300
+        self.freq_offset = freq_offset = -1900
         self.center_freq = center_freq = 915e6
 
         ##################################################

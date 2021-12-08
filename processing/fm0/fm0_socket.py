@@ -56,12 +56,15 @@ def convert_symbols():
             if p == Pulse.SHORT_PULSE:
                 yield 0
             else:
+                # short long shoulnd't happen, lost sync
                 # print("sync")
+                # yield 0
                 yield 1
         else:
             yield 1
 
-def analysis():
+# expects 10101010...
+def one_zero_analysis():
     print("Starting analysis...")
 
     BLOCK_SIZE = 1000
@@ -82,7 +85,45 @@ def analysis():
         n += 1
         last = symb
 
+# expects (decoded) 0x00 0x01 0x02 ...
+# look for 0x00 to synchronize
+def count_analysis():
+    print("Starting analysis")
 
+    read_bits = ""
+    last_data = 0
+    n = 0
+
+    total = 0
+    correct = 0
+
+    for symb in convert_symbols():
+        read_bits += str(symb)
+        n += 1
+        
+        if read_bits.endswith("00000000"):
+            print("synchronized")
+            read_bits = ""
+            last_data = 0
+            n = 0
+
+        if n == 8:
+            data = int(read_bits[-8:], 2)
+            
+            if data == (last_data + 1) & 0xFF:
+                correct += 1
+                print(f"= {data:3}")
+            else:
+                print(f"= {data:3} *")
+
+            last_data = data
+            n = 0
+
+            total += 1
+
+        if len(read_bits) > 32:
+            read_bits = read_bits[7:]
+            print(f"\t{100 * correct / total:.2f}%")
 
 class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
@@ -92,7 +133,7 @@ class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
 if __name__ == '__main__':
     HOST, PORT = "localhost", 5555
 
-    analysis_thread = threading.Thread(target=analysis)
+    analysis_thread = threading.Thread(target=count_analysis)
     analysis_thread.daemon = True
     analysis_thread.start()
 

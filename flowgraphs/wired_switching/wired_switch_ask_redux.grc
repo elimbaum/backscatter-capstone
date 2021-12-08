@@ -63,7 +63,7 @@ blocks:
     gui_hint: ''
     label: Freq Offset (Hz)
     type: real
-    value: '1300'
+    value: '-1900'
   states:
     bus_sink: false
     bus_source: false
@@ -126,7 +126,7 @@ blocks:
     gui_hint: 1,2,1,1
     label: Scatter Freq (Hz)
     type: real
-    value: '161632.65'
+    value: '149545.76'
   states:
     bus_sink: false
     bus_source: false
