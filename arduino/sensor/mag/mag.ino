@@ -1,7 +1,7 @@
 
-#define MAG_PIN A1
+#define MAG_PIN A0
 
-#define AVG_LEN 64
+#define AVG_LEN 128
 
 void setup() {
     Serial.begin(115200);
