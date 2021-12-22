@@ -5,9 +5,10 @@
 
 #define BASEBAND_PRESCALE 1
 
-#define BITS_PER_SECOND 1000
-#define BIT_PRESCALE    64
-#define BIT_OCR         (F_CPU / BIT_PRESCALE / BITS_PER_SECOND - 1)
+#define SYMB_PER_SECOND 1000
+#define FM0_BITS_PER_SECOND (SYMB_PER_SECOND / 2)
+#define SYMB_PRESCALE    64
+#define SYMB_OCR         (F_CPU / SYMB_PRESCALE / SYMB_PER_SECOND - 1)
 
 // number of groups of preamble symbols to send
 // we sent 0xd2, which when hamming encoded is fully alternating

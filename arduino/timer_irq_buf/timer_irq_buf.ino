@@ -129,8 +129,8 @@ void setup() {
     Serial.println(" Hz");
   }
 
-  Serial.print("Bit OCR2A: ");
-  Serial.println(BIT_OCR);
+  Serial.print("Symb OCR2A: ");
+  Serial.println(SYMB_OCR);
 
   sprintf(serial_buffer, "Sending message %s (len %d)",
           MESSAGE,

@@ -105,7 +105,7 @@ void setup_timers(long req_center_f) {
 
   set_count(count_zero);
 
-  OCR2A = BIT_OCR;
+  OCR2A = SYMB_OCR;
 }
 
 void configure_ask() {
