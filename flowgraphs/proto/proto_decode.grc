@@ -286,24 +286,6 @@ blocks:
     coordinate: [344, 332.0]
     rotation: 0
     state: enabled
-- name: blocks_add_const_vxx_0
-  id: blocks_add_const_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: '48'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: byte
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1296, 332.0]
-    rotation: 0
-    state: disabled
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -376,6 +358,25 @@ blocks:
     coordinate: [616, 312.0]
     rotation: 0
     state: enabled
+- name: blocks_null_source_0
+  id: blocks_null_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_source: '[[0,],]'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1144, 592.0]
+    rotation: 0
+    state: true
 - name: blocks_sub_xx_0
   id: blocks_sub_xx
   parameters:
@@ -403,16 +404,16 @@ blocks:
     eof: 'True'
     ipaddr: localhost
     port: '5555'
-    psize: '100'
-    type: byte
+    psize: '1024'
+    type: float
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1424, 332.0]
+    coordinate: [1288, 252.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: low_pass_filter_0
   id: low_pass_filter
   parameters:
@@ -651,7 +652,7 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '1'
+    nconnections: '2'
     size: '1024'
     srate: filter_samp_rate
     stemplot: 'False'
@@ -691,7 +692,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1240, 492.0]
+    coordinate: [1328, 492.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -1408,14 +1409,15 @@ blocks:
 connections:
 - [analog_sig_source_x_0, '0', uhd_usrp_sink_0, '0']
 - [analog_sig_source_x_1, '0', blocks_multiply_xx_0, '1']
-- [blocks_add_const_vxx_0, '0', blocks_udp_sink_0, '0']
 - [blocks_complex_to_mag_0, '0', blocks_moving_average_xx_0, '0']
 - [blocks_complex_to_mag_0, '0', blocks_sub_xx_0, '0']
 - [blocks_moving_average_xx_0, '0', blocks_sub_xx_0, '1']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [blocks_null_source_0, '0', qtgui_time_sink_x_0, '1']
 - [blocks_sub_xx_0, '0', blocks_file_sink_0, '0']
+- [blocks_sub_xx_0, '0', blocks_udp_sink_0, '0']
 - [blocks_sub_xx_0, '0', qtgui_time_sink_x_0, '0']
 - [low_pass_filter_0, '0', blocks_complex_to_mag_0, '0']
 - [low_pass_filter_0, '0', qtgui_freq_sink_x_1, '0']

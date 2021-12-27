@@ -213,7 +213,7 @@ class top_block(gr.top_block, Qt.QWidget):
             1024, #size
             filter_samp_rate, #samp_rate
             "", #name
-            1 #number of inputs
+            2 #number of inputs
         )
         self.qtgui_time_sink_x_0.set_update_time(0.10)
         self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
@@ -243,7 +243,7 @@ class top_block(gr.top_block, Qt.QWidget):
             -1, -1, -1, -1, -1]
 
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -265,7 +265,9 @@ class top_block(gr.top_block, Qt.QWidget):
                 pulse_width_hz * 0.5,
                 firdes.WIN_HAMMING,
                 6.76))
+        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_float*1, 'localhost', 5555, 1024, True)
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
+        self.blocks_null_source_0 = blocks.null_source(gr.sizeof_float*1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(moving_avg_len, 1/moving_avg_len, 5 * moving_avg_len, 1)
         self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*1, '/Users/ebaum/Documents/capstone/iq/tmp_ask-fulldata-30k.iq', False)
@@ -285,7 +287,9 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_sub_xx_0, 1))
         self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
+        self.connect((self.blocks_null_source_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_sub_xx_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.blocks_sub_xx_0, 0), (self.blocks_udp_sink_0, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.blocks_complex_to_mag_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_multiply_xx_0, 0))
