@@ -7,7 +7,7 @@
 #include "Arduino.h"
 
 // queue max size, bytes
-#define QUEUE_SIZE 32
+#define QUEUE_SIZE 16
 #define _QUEUE_SIZE_BITS (QUEUE_SIZE * 8L)
 
 #define QUEUE_EMPTY -1
@@ -30,5 +30,6 @@ int queue_empty_spots();
 bool enqueue(uint8_t item);
 int dequeue();
 int queue_count();
+void enqueue_block(uint8_t);
 
 #endif

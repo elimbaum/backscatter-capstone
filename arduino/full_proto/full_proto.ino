@@ -14,7 +14,7 @@
 
 #define MEAS_AVG_LEN 128
 
-#define PACKET_SIZE 64
+#define PACKET_SIZE 16
 #define PACKET_NULL 16
 #define ACCESS_CODE_LENGTH 4
 const uint8_t ACCESS_CODE[ACCESS_CODE_LENGTH] = {0xe1, 0x5a, 0xe8, 0x93};
@@ -24,15 +24,15 @@ uint8_t sqn = 0;
 
 void enqueue_access_code() {
     for (int i = 0; i < ACCESS_CODE_LENGTH; i++) {
-        enqueue(ACCESS_CODE[i]);
+        enqueue_block(ACCESS_CODE[i]);
     }
 }
 
 // TOOD: add null region before this
 void enqueue_packet_header() {
     enqueue_access_code();
-    enqueue(sqn++);
-    enqueue(PACKET_SIZE);
+    enqueue_block(sqn++);
+    enqueue_block(PACKET_SIZE);
 }
 
 static char serial_buffer[128];
@@ -70,8 +70,9 @@ volatile unsigned long sent_bits = 0;
 unsigned long num_readings = 0;
 
 void loop() {
-    int spots = queue_empty_spots();
+    digitalWrite(RED_LED, HIGH);
     // get queue empty spots
+    int spots = queue_empty_spots();
 
     sprintf(serial_buffer, "Filling %d spots", spots);
     Serial.println(serial_buffer);
@@ -104,8 +105,7 @@ void loop() {
     }
     digitalWrite(GREEN_LED, LOW);
     
-
-    delay(20);
+    delay(45);
 }
 
 
@@ -121,7 +121,8 @@ inline char get_bit() {
         int d = dequeue();
 
         if (d == QUEUE_EMPTY) {
-            Serial.print("Q");
+            // Serial.print("Qe");
+            digitalWrite(RED_LED, LOW);
             return 0;
         }
 

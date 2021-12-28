@@ -30,6 +30,7 @@ int queue_count() {
 bool enqueue(uint8_t item) {
   if (queue_is_full()) {
     // no more room.
+    Serial.print("Qf");
     return false;
   }
 
@@ -41,6 +42,12 @@ bool enqueue(uint8_t item) {
 
   return true;
 }
+
+void enqueue_block(uint8_t item) {
+  while (queue_is_full()) { }
+
+  enqueue(item);
+} 
 
 int dequeue() {
   if (queue_is_empty()) {
