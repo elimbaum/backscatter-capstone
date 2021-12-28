@@ -105,7 +105,7 @@ void loop() {
     }
     digitalWrite(GREEN_LED, LOW);
     
-    delay(45);
+    delay(50);
 }
 
 

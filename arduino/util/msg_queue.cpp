@@ -38,7 +38,10 @@ bool enqueue(uint8_t item) {
     queue_tail = -1;
   }
   queue[++queue_tail] = item;
+
+  noInterrupts();
   _queue_count++;
+  interrupts();
 
   return true;
 }
@@ -58,7 +61,10 @@ int dequeue() {
   if (queue_head >= QUEUE_SIZE) {
     queue_head = 0;
   }
+
+  noInterrupts();
   _queue_count--;
- 
+  interrupts();
+
   return item;
 }

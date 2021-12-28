@@ -319,7 +319,7 @@ blocks:
     bus_structure: null
     coordinate: [1312, 652.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_moving_average_xx_0
   id: blocks_moving_average_xx
   parameters:

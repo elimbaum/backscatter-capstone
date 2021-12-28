@@ -5,15 +5,18 @@
 # TODO: copy over FM0 decoder
 # Graphing of magnetic values
 
+import itertools as it
+from matplotlib import animation, pyplot as plt
+import numpy as np
 import socketserver
 import struct
-import itertools
-from queue import Queue
-from enum import Enum
 import threading
-import numpy as np
-from bitarray import bitarray, util as bautil
+import threading
 import time
+
+from enum import Enum
+from queue import Queue
+from bitarray import bitarray, util as bautil
 
 SYMB_RATE = 1000
 SAMP_RATE = 30e3
@@ -97,7 +100,7 @@ class FM0Decoder():
         # store the last `ACCESS_CODE_BITS` symbols to check for the
         # access code. Load with one fewer to get the loop precondition right.
         check_ac = bitarray('0')
-        check_ac.extend(itertools.islice(symb, ACCESS_CODE_N_BITS - 1))
+        check_ac.extend(it.islice(symb, ACCESS_CODE_N_BITS - 1))
 
         assert len(check_ac) == ACCESS_CODE_N_BITS
 
@@ -114,7 +117,7 @@ class FM0Decoder():
                 continue
 
             # good access code, check sqn
-            sqn = bautil.ba2int(bitarray(itertools.islice(symb, 8)))
+            sqn = bautil.ba2int(bitarray(it.islice(symb, 8)))
 
             if last_sqn is not None and (last_sqn + 1) & 0xFF != sqn:
                 print(f"sqn error {bautil.ba2hex(check_ac)} {sqn=:02x}")
@@ -129,10 +132,10 @@ class FM0Decoder():
             last_sqn = sqn
 
             # this is in bytes
-            pkt_len = bautil.ba2int(bitarray(itertools.islice(symb, 8)))
+            pkt_len = bautil.ba2int(bitarray(it.islice(symb, 8)))
 
             # read the data into a byte array
-            data_b = bitarray(itertools.islice(symb, pkt_len * 8)).tobytes()
+            data_b = bitarray(it.islice(symb, pkt_len * 8)).tobytes()
 
             # convert to unsigned char
             data = struct.unpack(f"{pkt_len}B", data_b)
@@ -143,22 +146,44 @@ class FM0Decoder():
 
             # have a good correlation!
 
+# create thread for receive/decoding
+PLOT_SIZE = 500
+plot_values = np.full((PLOT_SIZE,), -np.inf)
 
+MAX_SENSOR = 239
+MIN_SENSOR = 1
+SENSOR_ZERO = (MAX_SENSOR + MIN_SENSOR) / 2
 
 def decode_sensor():
+    global plot_values
     dec = FM0Decoder()
     
     pulse = dec.extractPulses(dec.unload_queue(rawQ))
     clean_pulse = dec.finePulse(pulse)
     symb = dec.pulseToSymbol(clean_pulse)
-    for reading in dec.symbolToPacket(symb):
-        pass
-        # # print(reading, end=', ')
-        # if np.isinf(reading):
-        #     print()
-        # else:
-        #     print(reading, "=" * round(reading / 2))
+    for i, reading in enumerate(dec.symbolToPacket(symb)):
+        mapped = (reading - SENSOR_ZERO) / (MAX_SENSOR - SENSOR_ZERO)
+        # add to the end and then delete first elm
+        plot_values = np.delete(np.append(plot_values, mapped), 0)
 
+##### GRAPING!
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.set_xlim(-PLOT_SIZE, 0)
+ax.set_ylim(-1.1, 1.1)
+plt.title("Received Sensor Readings")
+plt.ylabel("Magnetism")
+plt.xlabel("Time")
+
+x = np.arange(-PLOT_SIZE, 0, 1)
+plot, = plt.plot(x, plot_values)
+
+def animate(i):
+    plot.set_ydata(plot_values)
+
+    return plot,
+
+anim = animation.FuncAnimation(fig, animate, interval=250, blit=True)
 
 class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
@@ -166,13 +191,21 @@ class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
         for f in struct.iter_unpack('f', req):
             rawQ.put(f[0])
 
+def run_server():
+    server = socketserver.ThreadingUDPServer((HOST, PORT), ThreadedUDPHandler)
+    with server:
+        server.serve_forever()
+
 if __name__ == '__main__':
     HOST, PORT = "localhost", 5555
 
+    print("==== Decoder Thread ====")
     decode_thread = threading.Thread(target=decode_sensor, daemon=True)
     decode_thread.start()
 
-    server = socketserver.ThreadingUDPServer((HOST, PORT), ThreadedUDPHandler)
-    with server:
-        print("Starting server...")
-        server.serve_forever()
+    print("==== Server Thread ====")
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+
+    print("Opening graph...")
+    plt.show()
