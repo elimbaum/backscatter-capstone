@@ -18,7 +18,7 @@ from enum import Enum
 from queue import Queue
 from bitarray import bitarray, util as bautil
 
-SYMB_RATE = 1000
+SYMB_RATE = 2000
 SAMP_RATE = 30e3
 SPS = SAMP_RATE // SYMB_RATE
 
@@ -139,15 +139,17 @@ class FM0Decoder():
 
             # convert to unsigned char
             data = struct.unpack(f"{pkt_len}B", data_b)
-
-            print(f"{bautil.ba2hex(check_ac)} {sqn=:02x} {pkt_len=} {data[:4]}")
+            
+            # just show a few vals
+            partial_str = np.array2string(np.array(data), threshold=0, edgeitems=4)
+            print(f"{bautil.ba2hex(check_ac)} {sqn=:02x} {pkt_len=} {partial_str}")
 
             yield from data
 
             # have a good correlation!
 
 # create thread for receive/decoding
-PLOT_SIZE = 500
+PLOT_SIZE = 1000
 plot_values = np.full((PLOT_SIZE,), -np.inf)
 
 MAX_SENSOR = 239
@@ -173,18 +175,38 @@ ax.set_xlim(-PLOT_SIZE, 0)
 ax.set_ylim(-1.1, 1.1)
 plt.title("Received Sensor Readings")
 plt.ylabel("Magnetism")
-plt.xlabel("Time")
+plt.xlabel("Time (# of samples ago)")
 
 x = np.arange(-PLOT_SIZE, 0, 1)
 plot, = plt.plot(x, plot_values)
 
+AUTOSCALE = False
+AUTOSCALE_FACTOR = 1.25
+
 def animate(i):
     plot.set_ydata(plot_values)
 
+    if AUTOSCALE:
+        # keep zero in the middle
+        max_b = np.where(np.isinf(plot_values), -1, plot_values).max()
+        min_b = np.where(np.isinf(plot_values),  1, plot_values).min()
+
+        bound = max(abs(max_b), abs(min_b)) * AUTOSCALE_FACTOR
+
+        # print("bounds", min_b, max_b)
+        ax.set_ylim(-bound, bound)
+
+    plt.draw()
+
     return plot,
 
-anim = animation.FuncAnimation(fig, animate, interval=250, blit=True)
+anim = animation.FuncAnimation(fig, animate, interval=100)
 
+# Threaded UDP server handles incoming data from GNURadio
+# ...eventually the radio stuff could be moved in here, but easier for now.
+#
+# Note that the main server itself runs in its own thread, but also
+# spawns a new thread to handle incoming connections.
 class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         req = self.request[0]
@@ -207,5 +229,5 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
 
-    print("Opening graph...")
+    print("==== Opening graph... ====")
     plt.show()

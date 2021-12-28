@@ -77,7 +77,7 @@ class top_block(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.tone_freq_khz = tone_freq_khz = 300
-        self.symbol_rate = symbol_rate = 1e3
+        self.symbol_rate = symbol_rate = 2e3
         self.filter_samp_rate = filter_samp_rate = 30e3
         self.tx_samp_rate = tx_samp_rate = 1e6
         self.tx_gain = tx_gain = 89
@@ -86,7 +86,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.scatter_center_freq = scatter_center_freq = 149545.76
         self.samp_rate = samp_rate = 200e3
         self.rx_gain = rx_gain = 38
-        self.pulse_width_hz = pulse_width_hz = 2000
+        self.pulse_width_hz = pulse_width_hz = int(1.5 * symbol_rate)
         self.oversample = oversample = 4
         self.moving_avg_len = moving_avg_len = int(filter_samp_rate/symbol_rate * 10)
         self.freq_offset = freq_offset = -1400
@@ -256,6 +256,46 @@ class top_block(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            1024, #size
+            firdes.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            1
+        )
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
+        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(True)
+
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.low_pass_filter_0 = filter.fir_filter_ccf(
             int(samp_rate/filter_samp_rate),
             firdes.low_pass(
@@ -286,6 +326,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_complex_to_mag_0, 0), (self.blocks_sub_xx_0, 0))
         self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_sub_xx_0, 1))
         self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.blocks_null_source_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_sub_xx_0, 0), (self.blocks_file_sink_0, 0))
@@ -314,6 +355,7 @@ class top_block(gr.top_block, Qt.QWidget):
     def set_symbol_rate(self, symbol_rate):
         self.symbol_rate = symbol_rate
         self.set_moving_avg_len(int(self.filter_samp_rate/self.symbol_rate * 10))
+        self.set_pulse_width_hz(int(1.5 * self.symbol_rate))
         self.set_sps(int(self.filter_samp_rate/self.symbol_rate))
 
     def get_filter_samp_rate(self):
@@ -369,6 +411,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_1.set_sampling_freq(self.samp_rate)
         self.low_pass_filter_0.set_taps(firdes.low_pass(0.1, self.samp_rate, self.pulse_width_hz, self.pulse_width_hz * 0.5, firdes.WIN_HAMMING, 6.76))
+        self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 

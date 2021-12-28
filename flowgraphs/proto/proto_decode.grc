@@ -102,7 +102,7 @@ blocks:
     gui_hint: 2,3,1,1
     label: pulse width (hz)
     type: int
-    value: '2000'
+    value: int(1.5 * symbol_rate)
   states:
     bus_sink: false
     bus_source: false
@@ -174,7 +174,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 1e3
+    value: 2e3
   states:
     bus_sink: false
     bus_source: false
@@ -468,7 +468,7 @@ blocks:
     color8: '"dark red"'
     color9: '"dark green"'
     comment: ''
-    ctrlpanel: 'False'
+    ctrlpanel: 'True'
     fc: '0'
     fftsize: '1024'
     freqhalf: 'True'
@@ -517,7 +517,7 @@ blocks:
     bus_structure: null
     coordinate: [832, 300.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_1
   id: qtgui_freq_sink_x
   parameters:

@@ -12,7 +12,7 @@
 #define BUTTON 12
 #define MAG_PIN A0
 
-#define MEAS_AVG_LEN 128
+#define MEAS_AVG_LEN 64
 
 #define PACKET_SIZE 16
 #define PACKET_NULL 16

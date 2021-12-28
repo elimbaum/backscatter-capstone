@@ -7,7 +7,7 @@
 #include "Arduino.h"
 
 // queue max size, bytes
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 32
 #define _QUEUE_SIZE_BITS (QUEUE_SIZE * 8L)
 
 #define QUEUE_EMPTY -1
