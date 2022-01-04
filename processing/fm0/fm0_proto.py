@@ -168,7 +168,7 @@ def decode_sensor():
         # add to the end and then delete first elm
         plot_values = np.delete(np.append(plot_values, mapped), 0)
 
-##### GRAPING!
+##### GRAPHING!
 
 fig, ax = plt.subplots(figsize=(10, 5))
 ax.set_xlim(-PLOT_SIZE, 0)
