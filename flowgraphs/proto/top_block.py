@@ -305,13 +305,11 @@ class top_block(gr.top_block, Qt.QWidget):
                 pulse_width_hz * 0.5,
                 firdes.WIN_HAMMING,
                 6.76))
-        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_float*1, 'localhost', 5555, 1024, True)
+        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_float*1, '127.0.0.1', 5555, 1024, True)
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_float*1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(moving_avg_len, 1/moving_avg_len, 5 * moving_avg_len, 1)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*1, '/Users/ebaum/Documents/capstone/iq/tmp_ask-fulldata-30k.iq', False)
-        self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_complex_to_mag_0 = blocks.complex_to_mag(1)
         self.analog_sig_source_x_1 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, -freq_offset, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(tx_samp_rate, analog.GR_COS_WAVE, tone_freq, 1, 0, 0)
@@ -329,7 +327,6 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.blocks_null_source_0, 0), (self.qtgui_time_sink_x_0, 1))
-        self.connect((self.blocks_sub_xx_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.blocks_udp_sink_0, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.blocks_complex_to_mag_0, 0))

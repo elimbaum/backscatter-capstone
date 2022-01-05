@@ -180,7 +180,7 @@ plt.xlabel("Time (# of samples ago)")
 x = np.arange(-PLOT_SIZE, 0, 1)
 plot, = plt.plot(x, plot_values)
 
-AUTOSCALE = False
+AUTOSCALE = True
 AUTOSCALE_FACTOR = 1.25
 
 def animate(i):
@@ -214,13 +214,13 @@ class ThreadedUDPHandler(socketserver.DatagramRequestHandler):
             rawQ.put(f[0])
 
 def run_server():
+    HOST, PORT = "127.0.0.1", 5555
+
     server = socketserver.ThreadingUDPServer((HOST, PORT), ThreadedUDPHandler)
     with server:
         server.serve_forever()
 
 if __name__ == '__main__':
-    HOST, PORT = "localhost", 5555
-
     print("==== Decoder Thread ====")
     decode_thread = threading.Thread(target=decode_sensor, daemon=True)
     decode_thread.start()

@@ -4,9 +4,6 @@
 
 Eli Baum
 
-- topic sentences
-- active voice
-
 ## Overview
 
 Wireless communications systems require significant power and can be rather large due to the analog circuitry required to modulate radio signals. Here, we propose a method of using *backscatter technology* to build extremely low-power wireless sensors. Without the normal requirements of radio transmitters, these backscatter sensors can be small, cheap, and long-lived; furthermore, since they emit no power, they are difficult for an adversary to detect.
@@ -16,6 +13,11 @@ A backscatter transmitter modulates reflected radio signals from another source,
 Backscatter systems can also be cheaply manufactured to provide distributed sensing capabilities. Warfighters could distribute thousands of sensors across an area of interest and fly data-collection drones over the sensor field. Or, a fixed station could read data in real time from hidden sensors at a distance.
 
 In this prototype, an SDR is used to generate a fixed-frequency tone at 915 MHz. The sensor modulates data at approximately 150 kHz; the receive side of the SDR is therefore tuned to 915.15 MHz. We attach a magnetic sensor to demonstrate one possible Sponsor-focused application. However, this demonstration is not the limit of backscatter sensing technology: academic research has demonstrated the ability for relatively complex backscatter systems to be powered entirely by harvested ambient radio frequency energy, while other studies have used custom waveforms to receive backscatter signals over distances of more than a kilometer.
+
+<div style="text-align: center;">
+<div><img src="img/angle2.jpeg" height=300></div>
+<em>Our backscatter sensor module. The bulk of the current module is an Arduino. The green circuit board is a magnetic sensor; the RF switch is in the rear.</em>
+</div>
 
 ## Backscatter
 
@@ -32,11 +34,11 @@ Alice comes up with an alternative scheme: she carries a mirror which she uses t
 Alice and Bob soon run into an issue – if the moon is not in the sky, or it is cloudy, they are unable to communicate. Seeking more reliable communication, Bob sets up a lantern at a third location; Alice can once again either reflect, or not reflect, the light from the lantern towards Bob.
 
 <div style="text-align: center;">
-<div><img src="img/analogy.png" width=600></div>
+<div><img src="img/analogy.png" height=300></div>
 <em>Alice stands on the left hill with a mirror. Bob places a lantern on the central hill, and stands on the rightmost hill.</em>
 </div>
 
-One problem remains: how can Bob see Alice's dim reflections, when the lantern is so much brighter? Perhaps Bob has a shade or lenses. However, imagine a *phosphorescent mirror*; that is, one which changes the color of reflected light. Then, Bob could filter the wavelength of light coming from his lantern; only Alice's signal will remain.
+One problem remains: how can Bob see Alice's dim reflections, when the lantern is so much brighter? Perhaps Bob has a shade or lenses. However, imagine a *fluorescent mirror*; that is, one which changes the wavelength (and therefore color) of reflected light. Then, Bob could filter the wavelength of light coming from his lantern; only Alice's signal will remain.
 
 ---
 
@@ -46,7 +48,7 @@ In this prototype, we use an SDR as both illuminator and detector. The transmit 
 
 For the "color-changing" component of Alice's mirror, we take advantage of constructive interference:
 
-Given two signals $A$ and $B$, with respective frequencies $f_A$ and $f_B$, the addition of those two signals $A+B$ will appear to have a frequency component at $f_A \pm f_B$. (This is often noted in music, where the perceived *beat frequency* can be used to tune an instrument, but we can just as easily create a frequency-shifting effect at radio frequencies.) In this prototype, the cosine illuminator is transmitted at 915 MHz ($=f_A$); the sensor module is configured to toggle the RF switch at approximately 150 kHz ($=f_B$). Therefore, we expect artifacts to appear at $915\pm0.15$ MHz. By tuning the receive (RX) side of the SDR to 915.15 MHz, and keeping its bandwidth below 300 kHz (we use 200 kHz, the minimum of our hardware), interference from the transmitter is entirely eliminiated. At this point, the reflected signal can be modulated in various ways. See *[Physical Layer](#physical-layer)*, below, for further details.
+Given two signals $A$ and $B$, with respective frequencies $f_A$ and $f_B$, the addition of those two signals $A+B$ will appear to have a frequency component at $f_A \pm f_B$. (This is often noted in music, where the perceived *beat frequency* can be used to tune an instrument, but we can just as easily create a frequency-shifting effect at radio frequencies.) In this prototype, the cosine illuminator is transmitted at 915 MHz ($=f_A$); the sensor module is configured to toggle the RF switch at approximately 150 kHz ($=f_B$). Therefore, we expect artifacts to appear at $915\pm0.15$ MHz. By tuning the receive (RX) side of the SDR to 915.15 MHz, and keeping its bandwidth below 300 kHz (we use 200 kHz, the minimum of our hardware), interference from the transmitter is entirely eliminated. At this point, the reflected signal can be modulated in various ways. See *[Physical Layer](#physical-layer)*, below, for further details.
 
 In the national security domain, backscatter was perhaps most famously used by the Soviet Union during their bugging of the American Embassy in Moscow with "[The Thing](https://en.wikipedia.org/wiki/The_Thing_(listening_device))." This project is inspired by that use case, but we consider witting, environmental sensing applications (rather than covert espionage uses) for backscatter technology.
 
@@ -56,22 +58,27 @@ Some commercial radio frequency identification (RFID) systems use backscatter te
 
 The most well-known of such technologies is passive RFID, commonly encountered in electronic access control systems and contactless payment. In these systems, a tag reader generates an "interrogation" signal which is then reflected, and modulated, by the tag. Often (as in the case of a badge reader), the tag contains no power supply of its own, and instead harvests power from the interrogation signal itself.
 
-Usually, passive systems work only at sufficiently small distances where the reader and tag antennas can *magnetically couple* (on order of centimeters, and such coupling attenuates much faster); no actual radio signals are exchanged. However, some passive RFID systems *do* indeed work via radio waves in a manner similar to the backscatter communication module presented here – certain electronic toll collection systems are a common example.
+Usually, passive systems work only at sufficiently small distances where the reader and tag antennas can *magnetically couple* (on order of centimeters, and such coupling attenuates much faster); no actual radio signals are exchanged. This is known as the "near field." However, some passive RFID systems *do* indeed work via radio waves (or "far field") in a manner similar to the backscatter communication module presented here – certain electronic toll collection systems are a common example.
 
-Passive RFID contrasts with *active RFID*, which operates more like a normal wireless transmitter. Here, the interrogation signal "wakes up" the RFID tag, which then replies using its own dedicated transmitter. Such systems operate over greater distances, and with lower error, but of course use much more power than purely reflective systems.
+Passive RFID contrasts with *active RFID*, which operates more like a normal wireless transmitter. Here, the interrogation signal "wakes up" the RFID tag, which then replies using its own dedicated transmitter. Such systems operate over greater distances, and with lower error, but require their own batteries, using much more power than purely reflective systems.
 
 ## Prototype Components
 
-The prototype backscatter sensor module consists of an Arduino (with an ATmega328 microcontroller), an RF switch, and a magnetic sensor. We take readings from the magnetic sensor, process them on the Arduino, and transmit data using backscatter.
+The prototype backscatter sensor module consists of an Arduino (with an ATmega328 microcontroller), an RF switch, and a magnetic sensor. We take readings from the magnetic sensor, process them on the Arduino, and transmit data using backscatter. The SDR used was a USRP B210, but any SDR should work.
 
 <div style="text-align: center;">
-<div><img src="img/rfswitch.png" width=300></div>
+<div><img src="img/rfswitch.png" height=300></div>
 <em>A diagram of the hardware setup. The antenna is either grounded (through a 50Ω resistor, or not connected.)</em>
 </div>
 
 ### Physical Layer
 
 The physical layer consists of the actual modulation of information onto the 915 MHz carrier wave. We chose a simple physical layer for ease of implementation and rapid prototyping.
+
+<div style="text-align: center;">
+<div><img src="img/full antenna.jpeg" height=400></div>
+<em>The sensor module with antenna attached.</em>
+</div>
 
 #### Hardware
 
@@ -91,19 +98,19 @@ Other schemes, such as phase-shift keying (PSK) and quadrature amplitude modulat
 
 Once we are able to modulate the signal, the next problem is to actually send bits. In particular, we need a *clock recovery* method – how do we align our receiver's data stream with that of our reflector's? In this prototype, we have used *FM0 encoding*, an extremely simple run-length limited (RLL) code. RLL codes are designed to contain sufficient transitions to enable clock recovery; without FM0, a string of identical values could be difficult to differentiate.
 
-In fact, FM0 is quite similar to Morse code. `1` bits are encoded as a long pulse, while `0` is encoded as two short pulses (hence the "FM" or "frequency modulation" in its name). We do not care about the actual level of these pulses, but only their *transitions*: in practice, after every bit, we toggle the signal, but for a `0`, we also toggle halfway though that bit period. For example, to send the data `0110`, we encode:
+In fact, FM0 is quite similar to Morse code. `1` bits are encoded as a long pulse, while `0` is encoded as two short pulses (hence the "FM" or "frequency modulation" in its name). We do not care about the actual level of these pulses, but only their *transitions*: in practice, after every bit, we toggle the signal, but for a `0`, we also toggle halfway through that bit period. For example, to send the data `0110`, we encode:
 
     Data:   | 0| 1| 1| 0|
     Pulses:  SS  L  L SS
     TX: ...0 10 11 00 10 1...
 
 <div style="text-align: center;">
-<img src="img/fm0.png" width=500>
+<img src="img/fm0.png" height=200>
 </div>
 
 While this is not particularly efficient (it takes 2 symbols to send one bit, making FM0 a rate-1/2 code), it is simple to implement and appropriate for prototyping.
 
-At this point, a fieldable system would also include error-detection and correction schemes to ensure reliable communication at a distance. We implemented a Hamming encoder/decoder, but decided not include it in the final prototype, since it was unnecessary for demonstration purposes.
+At this point, a fieldable system would also include error-detection and correction schemes to ensure reliable communication at a distance. We implemented a Hamming encoder/decoder, but decided not to include it in the final prototype, since it was unnecessary for demonstration purposes.
 
 ### Packet Layer
 
@@ -118,9 +125,9 @@ Various data-transmission strategies are possible; we chose continuous data tran
     Data (8 bits per reading)
         xx xx xx ...
 
-The access code, `0xe15ae893`, is a commonly-used non-cyclical access code with strong auto-correlation properties. This makes it easy for the decoder to synchronize to the start of the packet: the access code correlates poorly with itself at all offsets except 0.
+The access code, `0xe15ae893`, is a commonly-used non-cyclical access code. This makes it easy for the decoder to synchronize to the start of the packet: the access code correlates poorly with itself at all offsets except 0.
 
-The sequence number provides some level of error detection, however – it is incremented for each packet (overflowing from 255 to 0); the decoder only accepts a packet if the decoded sequence number is one greater than the previous.
+The sequence number provides some level of error detection – it is incremented for each packet (overflowing from 255 to 0); the decoder only accepts a packet if the decoded sequence number is one greater than the previous.
 
 ### Sensor Demonstration
 
@@ -132,48 +139,79 @@ With these parameters, each packet is therefore 176 bits. At a symbol rate of 20
 
 The Python decoder is implemented as a series of layers. Each layer receives data from the one above, provides some processing functionality, and passes data down.
 
-1. SDR sampling
+1. **SDR sampling**
     
     GNURadio is used to read samples from the SDR.
 
-2. ASK decoding
+2. **ASK decoding**
 
     A simple ASK decoder converts samples into binary values. Since the sampling rate is much higher than the symbol rate (by about two orders of magnitude), there are multiple digitized samples per actual ASK symbol.
 
-3. Pulse length determination
+3. **Pulse length determination**
 
     FM0 decoding depends on the length of pulses in the input stream. First, we perform a *coarse* search – this layer simply returns the time between binary transitions.
 
-4. Pulse length clustering
+4. **Pulse length clustering**
 
     Due to noise and timing inaccuracies, not all pulses will be the expected short or long lengths. In this step, we cluster the received pulses around their estimated true length, and also account for noise. For example, a burst of noise in the middle of a long pulse (say, of length 2) may make that pulse look like three short pulses (say, of lengths 0.9, 0.2, and 0.9). This layer detects the noisy burst and converts the set of pulses into the correct long pulse.
 
-5. FM0 decoding
+5. **FM0 decoding**
 
     Now, we can turn pulses into symbols: two short pulses is a `0`; one long pulse is a `1`.
 
-6. Packet decoding
+6. **Packet decoding**
 
     Each packet begins with the non-cyclical access code. We use a sliding 32-bit window, correlated against the access code, to find the start of a packet (the correlation* reaches a maximum at perfect alignment). Next, we check the sequence number, and if correct, we read the length, and then the prescribed number of data bytes.
 
     *\* In a later version of the prototype, we use bitwise XOR rather than statistical correlation, since this ends up producing fewer false positives.*
 
-7. Data graphing
+7. **Data graphing**
 
     Finally, data values are plotted in real time with `matplotlib`.
+    
+<div style="text-align: center;">
+<div><img src="img/sensor-data.png" height=400></div>
+<em>Initial example of backscatter sensor readings. The sensor was not turned on until around t=5, so values prior to that point are noise.</em>
+</div>  
 
 ## Results
 
-it works
+<div style="text-align: center;">
+<div><img src="img/truck.jpeg" height=300></div>
+<em>Garbage truck and sensor module.</em>
+</div>  
 
-some distance results
+This prototype was meant as a proof of concept for future study, and has demonstrated that backscatter is a viable method for low-power, low-bitrate communications. We hid a magnet inside of a toy garbage truck, and demonstrate how the backscatter sensor module is able to detect the presence of the truck. Of course, with other sensors, various environmental parameters of interest could be measured, recorded, and analyzed.
 
-multiples of wavelength - nodes
+<div style="text-align: center;">
+<div><img src="img/screenshot.png" height=500></div>
+<em>A screenshot of the full software stack running the backscatter system. Clockwise from top left: 1) magnetic sensor readings; 2) debug printout from the microcontroller; 3) a time-domain view of the received ASK waveform; FM0 short and long pulses are visible; 4) debug output from the Python decoder.</em>
+</div>  
+
+A summary of the test parameters follows.
+
+- Physical layout
+    - 132 cm between TX and sensor
+    - 132 cm between RX and sensor
+- RF parameters
+    - TX gain: 89 dB (SDR maximum)
+    - RX gain: 26 dB
+    - Filter width: 3 kHz
+    - Frequency calibration: -1.4 kHz
+- Packet parameters
+    - 2000 symbols per second (therefore 1000 bps)
+    - ~ 91 measurements transmitted per second
+
+Placement of the TX and RX antennas in relation to the sensor is an important factor in the successful operation of the sensor module. At very close distances (i.e. on order of the wavelength of the carrier wave), magnetic coupling dominates, and the system is more akin to a passive near-field RFID system. For the 915 MHz carrier used here, one wavelength is 32.76 cm. To ensure we are operating in the RF far-field, antenna separation should be two wavelengths or more.
 
 ## Caveats and Future Work
 
-more robust transmission
+After many unsuccessful and unreliable tests, we realized (or at least suspect) that due to the short distances used in this demonstration, poor performance was occurring when the backscatter antenna was in a node (or null) of the transmitting tone. The radio waves are not traveling far enough for multi-path effects to make a difference, and since the illumination signal is a single sine wave, there will exist some nulls in the signal strength. We solved this problem by ensuring the backscatter sensor was some multiple of the wavelength away from both the TX and RX sensors (here, about 33 cm). In more realistic environments, frequency hopping or spread-spectrum modulation could help mitigate this problem.
 
-fsk, psk
+We are also interested in exploring more robust, higher bitrate transmissions. As mentioned above, there are many physical layer modulation schemes, such as FSK or PSK, that could enable faster transmission. Frequency-swept chirps, as used by LoRa communications, have shown success in backscatter systems, with particularly impressive performance over long distances. However, different RF hardware (such as *reactive* components) would be required (as well as a high-precision digital timer), particularly to enable phase shifts.
 
-faster data rate
+Additionally, more complex coding schemes (rather than FM0) would allow for a greater symbol rate and more efficient clock recovery; error correction would also be an improvement over naive sequence number checking.
+
+## Conclusion
+
+Backscatter technology will not replace standard wireless transmission in areas where it is currently used. However, due to its low cost, power, and size requirements, it has the potential to revolutionize distributed and covert sensing applications. We demonstrate a prototype backscatter sensing module that is able to wirelessly transmit 1000 bps of data over distances of about a meter. For applications where low-bitrate communications are acceptable, we hope that future research could significant increase the maximum transmission distance. Alternatively, the maximum bitrate of the system could be improved, opening up the possibility for other kinds of communications data, such as text or audio.
