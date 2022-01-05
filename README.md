@@ -38,7 +38,7 @@ Alice and Bob soon run into an issue – if the moon is not in the sky, or it is
 <em>Alice stands on the left hill with a mirror. Bob places a lantern on the central hill, and stands on the rightmost hill.</em>
 </div>
 
-One problem remains: how can Bob see Alice's dim reflections, when the lantern is so much brighter? Perhaps Bob has a shade or lenses. However, imagine a *fluorescent mirror*; that is, one which changes the wavelength (and therefore color) of reflected light. Then, Bob could filter the wavelength of light coming from his lantern; only Alice's signal will remain.
+One problem remains: how can Bob see Alice's dim reflections, when the lantern is so much brighter? Perhaps Bob is in a shadow from his lantern. However, imagine a *fluorescent mirror;* that is, one which changes the wavelength of reflected light. Then, Bob could filter the wavelength of light coming from his lantern; only Alice's signal will remain.
 
 ---
 
@@ -68,7 +68,7 @@ The prototype backscatter sensor module consists of an Arduino (with an ATmega32
 
 <div style="text-align: center;">
 <div><img src="img/rfswitch.png" height=300></div>
-<em>A diagram of the hardware setup. The antenna is either grounded (through a 50Ω resistor, or not connected.)</em>
+<em>A diagram of the hardware setup. The antenna is either grounded (through a 50Ω resistor), or not connected.</em>
 </div>
 
 ### Physical Layer
@@ -96,7 +96,7 @@ Other schemes, such as phase-shift keying (PSK) and quadrature amplitude modulat
 
 #### FM0
 
-Once we are able to modulate the signal, the next problem is to actually send bits. In particular, we need a *clock recovery* method – how do we align our receiver's data stream with that of our reflector's? In this prototype, we have used *FM0 encoding*, an extremely simple run-length limited (RLL) code. RLL codes are designed to contain sufficient transitions to enable clock recovery; without FM0, a string of identical values could be difficult to differentiate.
+Once we are able to modulate the signal, the next problem is to actually send bits. In particular, we need a *clock recovery* method – how do we align our receiver's data stream with that of our reflector? In this prototype, we have used *FM0 encoding*, an extremely simple run-length limited (RLL) code. RLL codes are designed to contain sufficient transitions to enable clock recovery; without FM0, a string of identical values could be difficult to differentiate.
 
 In fact, FM0 is quite similar to Morse code. `1` bits are encoded as a long pulse, while `0` is encoded as two short pulses (hence the "FM" or "frequency modulation" in its name). We do not care about the actual level of these pulses, but only their *transitions*: in practice, after every bit, we toggle the signal, but for a `0`, we also toggle halfway through that bit period. For example, to send the data `0110`, we encode:
 
@@ -131,43 +131,27 @@ The sequence number provides some level of error detection – it is incremented
 
 ### Sensor Demonstration
 
-The focus of this project was on backscatter communication itself, not on the particular data sent over the backscatter link. Here, we add a magnetic sensor to the backscatter sensor, to demonstrate real-time communication capabilities. We take a moving average of the sensor readings and send 16 8-bit values per packet.
-
-With these parameters, each packet is therefore 176 bits. At a symbol rate of 2000 baud, we can send 1000 bits per second. This gives about 5.7 packets per second, or 91 readings per second.
+The focus of this project was on backscatter communication itself, not on the particular data sent over the backscatter link. However, to demonstrate real-time communication capabilities, we add a magnetic sensor to the backscatter module. We take a moving average of the sensor readings and send 16 8-bit values per packet. With these parameters, each packet is therefore 176 bits. At a symbol rate of 2000 baud, we can send 1000 bits per second, giving about 5.7 packets, or 91 readings, per second.
 
 ### Decoder Implementation
 
 The Python decoder is implemented as a series of layers. Each layer receives data from the one above, provides some processing functionality, and passes data down.
 
-1. **SDR sampling**
-    
-    GNURadio is used to read samples from the SDR.
+1. **SDR sampling**: GNURadio is used to read samples from the SDR.
 
-2. **ASK decoding**
+2. **ASK decoding**: A simple ASK decoder converts samples into binary values. Since the sampling rate is much higher than the symbol rate (by about two orders of magnitude), there are multiple digitized samples per actual ASK symbol.
 
-    A simple ASK decoder converts samples into binary values. Since the sampling rate is much higher than the symbol rate (by about two orders of magnitude), there are multiple digitized samples per actual ASK symbol.
+3. **Pulse length determination**: FM0 decoding depends on the length of pulses in the input stream. First, we perform a *coarse* search – this layer simply returns the time between binary transitions.
 
-3. **Pulse length determination**
+4. **Pulse length clustering**: Due to noise and timing inaccuracies, not all pulses will be the expected short or long length. In this step, we cluster the received pulses around their estimated true length, and also account for noise. For example, a burst of noise in the middle of a long pulse of length 2 may make that pulse look like three short pulses of lengths 0.9, 0.2, and 0.9. This layer detects the noisy burst and converts the set of pulses into the correct long pulse.
 
-    FM0 decoding depends on the length of pulses in the input stream. First, we perform a *coarse* search – this layer simply returns the time between binary transitions.
+5. **FM0 decoding**: Now, we can turn pulses into symbols: two short pulses is a `0`; one long pulse is a `1`.
 
-4. **Pulse length clustering**
+6. **Packet decoding**: Each packet begins with the non-cyclical access code. We use a sliding 32-bit window, correlated against the access code, to find the start of a packet (the correlation* reaches a maximum at perfect alignment). Next, we check the sequence number, and if correct, we read the length, and then the prescribed number of data bytes.
 
-    Due to noise and timing inaccuracies, not all pulses will be the expected short or long lengths. In this step, we cluster the received pulses around their estimated true length, and also account for noise. For example, a burst of noise in the middle of a long pulse (say, of length 2) may make that pulse look like three short pulses (say, of lengths 0.9, 0.2, and 0.9). This layer detects the noisy burst and converts the set of pulses into the correct long pulse.
+    *\*In a later version of the prototype, we use bitwise XOR rather than statistical correlation, since this ends up producing fewer false positives.*
 
-5. **FM0 decoding**
-
-    Now, we can turn pulses into symbols: two short pulses is a `0`; one long pulse is a `1`.
-
-6. **Packet decoding**
-
-    Each packet begins with the non-cyclical access code. We use a sliding 32-bit window, correlated against the access code, to find the start of a packet (the correlation* reaches a maximum at perfect alignment). Next, we check the sequence number, and if correct, we read the length, and then the prescribed number of data bytes.
-
-    *\* In a later version of the prototype, we use bitwise XOR rather than statistical correlation, since this ends up producing fewer false positives.*
-
-7. **Data graphing**
-
-    Finally, data values are plotted in real time with `matplotlib`.
+7. **Data graphing**: Finally, data values are plotted in real time with `matplotlib`.
     
 <div style="text-align: center;">
 <div><img src="img/sensor-data.png" height=400></div>
@@ -184,7 +168,7 @@ The Python decoder is implemented as a series of layers. Each layer receives dat
 This prototype was meant as a proof of concept for future study, and has demonstrated that backscatter is a viable method for low-power, low-bitrate communications. We hid a magnet inside of a toy garbage truck, and demonstrate how the backscatter sensor module is able to detect the presence of the truck. Of course, with other sensors, various environmental parameters of interest could be measured, recorded, and analyzed.
 
 <div style="text-align: center;">
-<div><img src="img/screenshot.png" height=500></div>
+<div><img src="img/screenshot.png"></div>
 <em>A screenshot of the full software stack running the backscatter system. Clockwise from top left: 1) magnetic sensor readings; 2) debug printout from the microcontroller; 3) a time-domain view of the received ASK waveform; FM0 short and long pulses are visible; 4) debug output from the Python decoder.</em>
 </div>  
 
@@ -206,12 +190,25 @@ Placement of the TX and RX antennas in relation to the sensor is an important fa
 
 ## Caveats and Future Work
 
-After many unsuccessful and unreliable tests, we realized (or at least suspect) that due to the short distances used in this demonstration, poor performance was occurring when the backscatter antenna was in a node (or null) of the transmitting tone. The radio waves are not traveling far enough for multi-path effects to make a difference, and since the illumination signal is a single sine wave, there will exist some nulls in the signal strength. We solved this problem by ensuring the backscatter sensor was some multiple of the wavelength away from both the TX and RX sensors (here, about 33 cm). In more realistic environments, frequency hopping or spread-spectrum modulation could help mitigate this problem.
+After many unreliable tests, we realized (or at least suspect) that due to the short distances used in this demonstration, poor performance was occurring when the backscatter antenna was in a node (or null) of the transmitting tone. The radio waves are not traveling far enough for multi-path effects to make a difference, and since the illumination signal is a single sine wave, there will exist some nulls in the signal strength. We solved this problem by ensuring the backscatter sensor was some multiple of the wavelength away from both the TX and RX sensors (here, about 33 cm). In more realistic environments, frequency hopping or spread-spectrum modulation could help mitigate this problem.
 
-We are also interested in exploring more robust, higher bitrate transmissions. As mentioned above, there are many physical layer modulation schemes, such as FSK or PSK, that could enable faster transmission. Frequency-swept chirps, as used by LoRa communications, have shown success in backscatter systems, with particularly impressive performance over long distances. However, different RF hardware (such as *reactive* components) would be required (as well as a high-precision digital timer), particularly to enable phase shifts.
+We are also interested in exploring more robust, higher bitrate transmissions. As mentioned above, there are many physical layer modulation schemes, such as FSK or PSK, that could enable faster transmission. Frequency-swept chirps, as used by LoRa communications, have shown success in backscatter systems, with particularly impressive performance over long distances. However, different RF hardware (such as *reactive* components) would be required (as well as a high-precision digital timer), particularly to enable phase shifts. Even so, we caution that high bandwidth communications will likely not be possible with backscatter: since the returned power is much lower than a normal radio transmitter, the channel capacity is necessarily limited.
 
 Additionally, more complex coding schemes (rather than FM0) would allow for a greater symbol rate and more efficient clock recovery; error correction would also be an improvement over naive sequence number checking.
+
 
 ## Conclusion
 
 Backscatter technology will not replace standard wireless transmission in areas where it is currently used. However, due to its low cost, power, and size requirements, it has the potential to revolutionize distributed and covert sensing applications. We demonstrate a prototype backscatter sensing module that is able to wirelessly transmit 1000 bps of data over distances of about a meter. For applications where low-bitrate communications are acceptable, we hope that future research could significant increase the maximum transmission distance. Alternatively, the maximum bitrate of the system could be improved, opening up the possibility for other kinds of communications data, such as text or audio.
+
+### Possible Use Cases
+
+#### Distributed Sensing
+
+Consider a hypothetical scenario where a DoD sponsor wishes to monitor vehicle traffic in a large area. Rather than installing thousands of vibration sensors with high-power transmitters (say, cellular modems), low power *backscatter* sensors could be distributed across the area. These sensors would have much longer lifespans (and be harder to detect); from time to time, friendly vehicles could drive by and offload data from the sensors.
+
+Or, perhaps backscatter sensors could be attached to a field of sonobuoys. Rather than having the transmit data back to air platforms, the buoys could use backscatter to relay data to overflying receivers. This would enable significantly longer operating lifespans, given power supply constraints.
+
+#### Covert Sensing
+
+Backscatter sensing also has benefits for covert sensing, since no RF emissions can be detected when an illuminating tone is not present. Consider a facility which the U.S. government suspects of manufacturing nuclear or chemical weapons. An appropriate backscatter sensor could be hidden outside of the facility and take measurements when trucks are entering or exiting, storing the data for later retrieval during periods of low activity, when a drone could be flown past. Notably, even when the drone returns to collect data, the adversary will only be able to detect the illuminating tone; detecting the weak backscattered signal hidden next to the illuminating tone will be much more challenging. Or, a fixed station with highly directional antennas could be installed at a nearby listening post; this setup could prove beneficial for contested or heavily-monitored areas.
