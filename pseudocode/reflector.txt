@@ -1,0 +1,26 @@
+# Transmitter Pseudocode
+# Continuously takes sensor readings and sends them out
+#
+# Target: Arduino Uno (ATMega328)
+
+setup:
+    configure i/o
+    configure timers
+
+    # load access code, sqn, length
+    enqueue packet header
+
+loop:
+    s = count empty slots in the queue
+    repeat s times:
+        r = measure magnetic sensor
+        enqueue r
+
+        if packet is full:
+            # load access code, sqn, length
+            enqueue packet header
+
+# Runs every millisecond
+timer interrupt:
+    pull a bit off the queue
+    ask modulate bit on the RF switch

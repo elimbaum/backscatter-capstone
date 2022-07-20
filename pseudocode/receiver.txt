@@ -1,0 +1,40 @@
+# Receiver Pseudocode
+
+# This section runs in GNURadio
+receiver:
+    load samples from radio
+    retune to ASK center frequency
+    low pass filter
+    convert complex values to magnitudes
+    send to decoder
+
+# All other sections run in Python
+decoder:
+    ingest raw values from Receiver
+    binary slice
+
+    # Coarse Pulse Extraction
+    pulses = run-length encode sliced data
+
+    if any pulse is below is below threshold:
+        combine adjacent pulses
+
+    symbols = FM0 decode pulses
+    packet = unpack symbols
+
+    match = correlate packet against access code (0xe15ae893)
+
+    if no match:
+        continue
+
+    sqn = read sequence number
+    if sqn is out of order:
+        continue
+
+    n = read packet length
+    r = read n bytes
+    add r to plot_values
+    
+plot:
+    every 100 ms:
+        replot plot_values
