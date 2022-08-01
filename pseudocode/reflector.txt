@@ -1,4 +1,4 @@
-# Transmitter Pseudocode
+# Reflector Pseudocode
 # Continuously takes sensor readings and sends them out
 #
 # Target: Arduino Uno (ATMega328)
