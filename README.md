@@ -21,3 +21,5 @@ Repo layout:
     - Final prototype is `fm0/fm0_proto.py`
 - `pseudocode`
     - explanatory pseudocode for both the transmitter and receiver
+
+> MITRE Public Release Case Number: 22-2535
